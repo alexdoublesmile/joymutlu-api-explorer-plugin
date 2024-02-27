@@ -3,12 +3,11 @@ package com.joymutlu.apiexplorer;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 
 public class ExploreClassAction extends AnAction {
@@ -27,7 +26,10 @@ public class ExploreClassAction extends AnAction {
 
         if (psiClass != null) {
             String generatedCode = generateMethodCalls(psiClass);
-            editor.getDocument().replaceString(caretOffset - ".explore".length(), caretOffset, generatedCode);
+//            editor.getDocument().replaceString(caretOffset - ".explore".length(), caretOffset, generatedCode);
+            CommandProcessor.getInstance().executeCommand(project, () -> {
+                editor.getDocument().replaceString(caretOffset - ".explore".length(), caretOffset, generatedCode);
+            }, "Code Generation", null);
         }
     }
 

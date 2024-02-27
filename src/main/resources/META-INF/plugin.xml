@@ -1,0 +1,23 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>com.joymutlu.api-explorer</id>
+    <name>Api-explorer</name>
+    <vendor email="alexdoublesmile@gmail.com" url="https://joy-it.link">joymutlu</vendor>
+
+    <description><![CDATA[
+    Plugin for API exploring of any Java libraries and frameworks.
+  ]]></description>
+    <depends>com.intellij.modules.platform</depends>
+
+    <actions>
+        <group id="Explore">
+            <action class="com.joymutlu.apiexplorer.ExploreClassAction"
+                    id="ExploreClassAction">
+                <keyboard-shortcut first-keystroke="control alt E" keymap="$default"/>
+            </action>
+        </group>
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+    </extensions>
+</idea-plugin>

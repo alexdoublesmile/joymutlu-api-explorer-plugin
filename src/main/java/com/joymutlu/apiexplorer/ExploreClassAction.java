@@ -10,6 +10,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -23,10 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.intellij.openapi.ui.Messages.showMessageDialog;
@@ -53,13 +51,6 @@ public class ExploreClassAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-//        Handler handlerObj = new ConsoleHandler();
-//        handlerObj.setLevel(Level.ALL);
-//        LOGGER.addHandler(handlerObj);
-//        LOGGER.setLevel(Level.ALL);
-//        LOGGER.setUseParentHandlers(false);
-
-//        LOGGER.log(INFO, "Explorer triggered.");
         System.out.println("Explorer triggered.");
         exploreConfig = new ExploreConfig();
         final Editor editor = e.getRequiredData(CommonDataKeys.EDITOR);
@@ -68,25 +59,27 @@ public class ExploreClassAction extends AnAction {
         final CaretModel caretModel = editor.getCaretModel();
         final int caretOffset = caretModel.getOffset();
 
-        WriteCommandAction.runWriteCommandAction(project, () -> {
+
+        WriteCommandAction.runWriteCommandAction(project, getWriteAction(project, editor, caretOffset));
+    }
+
+    private Runnable getWriteAction(Project project, Editor editor, int caretOffset) {
+        return () -> {
             final Document document = editor.getDocument();
             final PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
             final int lastElementOffset = getLastElementOffset(caretOffset);
 
             PsiElement elementAtCaret;
             if ((elementAtCaret = tryDefineElement(psiFile, lastElementOffset)) != null) {
-                final Path filePath = of(requireNonNull(psiFile.getVirtualFile().getCanonicalPath()));
-//                LOGGER.log(INFO, format("Current file path was defined: [%s]", filePath));
-                System.out.printf("Current file path was defined: [%s]%n", filePath);
+//                final VirtualFile virtualFile = psiFile.getVirtualFile();
+//                final Path filePath = of(requireNonNull(virtualFile.getCanonicalPath()));
+//                System.out.printf("Current file path was defined: [%s]%n", filePath);
                 String userInput = elementAtCaret.getText();
                 final InputType inputType = getInputType(userInput);
-//                final ExploreStrategy exploreStrategy = exploreStrategyMap.get(inputType);
-//                LOGGER.log(INFO, format("User input [%s] was defined as %s", userInput, inputType.name()));
                 System.out.printf("User input [%s] was defined as %s%n", userInput, inputType.name());
 
                 String className = userInput;
                 if (inputType == OBJECT) {
-//                    LOGGER.log(INFO, format("Trying to define object [%s]...", userInput));
                     System.out.printf("Trying to define object [%s]...%n", userInput);
                     // TODO: 28.02.2024 find place object was init
                     // TODO: 28.02.2024 return type of this expression
@@ -99,29 +92,34 @@ public class ExploreClassAction extends AnAction {
                             "Caret should stay on exploring object or type", "Error", Messages.getErrorIcon());
                     return;
                 }
-//                LOGGER.log(INFO, format("Necessary Class name: [%s]...", className));
                 System.out.printf("Necessary Class name: [%s]%n", className);
 
-//                LOGGER.log(INFO, "Trying to define Full Class name...");
                 System.out.println("Trying to define Full Class name...");
                 String fullClassName = "";
                 List<String> classPathApplicants = new ArrayList<>();
-                try (final Stream<String> lines = lines(filePath)) {
-//                    LOGGER.log(INFO, "Scanning imports...");
+
+                CharSequence entireText = document.getText();
+
+                final ArrayList<String> lines = new ArrayList<>();
+                Scanner scanner = new Scanner(entireText.toString());
+                scanner.useDelimiter("\n");
+
+                while (scanner.hasNext()) {
+                    String line = scanner.next();
+                    lines.add(line);
+                }
+
+//                try (final Stream<String> lines = lines(filePath)) {
                     System.out.println("Scanning imports...");
                     final List<String> importList = lines
+                            .stream()
                             .filter(s -> s.startsWith(IMPORT_STRING_PREFIX))
                             .collect(toList());
-//                    LOGGER.log(INFO, format("Imports: [%s]...", importList));
                     System.out.printf("Imports: %s%n", importList);
-//                    System.out.println("Imports: " + importList);
 
                     fullClassName = importList.stream()
                             .filter(importStr -> {
                                 final boolean hasClassName = importStr.endsWith(className + DECLARATION_DELIMITER);
-//                                LOGGER.log(FINE, hasClassName
-//                                        ? format("[%s] has class name!", importStr)
-//                                        : format("[%s] doesn't fit...", importStr));
                                 System.out.println(hasClassName
                                         ? format("[%s] has class name!", importStr)
                                         : format("[%s] doesn't fit", importStr));
@@ -129,9 +127,6 @@ public class ExploreClassAction extends AnAction {
                             })
                             .filter(importStr -> {
                                 final boolean isFit = PACKAGE_DELIMITER == importStr.charAt(importStr.length() - className.length() - 2);
-//                                LOGGER.log(FINE, isFit
-//                                        ? format("[%s] fits!!!", importStr)
-//                                        : format("[%s] doesn't fit...", importStr));
                                 System.out.println(isFit
                                         ? format("[%s] fits!!!", importStr)
                                         : format("[%s] doesn't fit", importStr));
@@ -140,54 +135,43 @@ public class ExploreClassAction extends AnAction {
                             .map(s -> s.substring(IMPORT_STRING_PREFIX.length(), s.length() - 1))
                             .findFirst()
                             .orElse("");
-//                    LOGGER.log(INFO, fullClassName.isBlank()
-//                            ? "Necessary Class was not found in imports"
-//                            : format("Full Class name: [%s]", fullClassName));
                     System.out.println(fullClassName.isBlank()
                             ? "Necessary Class was not found in imports"
                             : format("Full Class name: [%s]", fullClassName));
 
                     if (fullClassName.isBlank()) {
-//                        LOGGER.log(INFO, "Collecting asterisk declarations...");
                         System.out.println("Collecting asterisk declarations...");
-//                        System.out.println("Imports: " + importList);
                         classPathApplicants = importList.stream()
                                 .filter(s -> s.endsWith(ASTERISK_DECLARATION))
                                 .map(s -> s.substring(IMPORT_STRING_PREFIX.length(), s.length() - ASTERISK_DECLARATION.length()))
                                 .collect(toList());
-//                    LOGGER.log(INFO, classPathApplicants.isEmpty()
-//                            ? "No asterisk declarations in imports"
-//                            : format("Path applicants: [%s]", classPathApplicants));
                         System.out.println(classPathApplicants.isEmpty()
                                 ? "No asterisk declarations in imports"
                                 : format("Path applicants: [%s]", classPathApplicants));
                     }
-                } catch (IOException ex) {
-//                    LOGGER.log(SEVERE, format("Fail to parse by lines file: [%s]", filePath));
-                    System.out.printf("Fail to parse by lines file: [%s]", filePath);
-                    throw new RuntimeException(ex);
-                }
+//                } catch (IOException ex) {
+//                    System.out.printf("Fail to parse by lines file: [%s]", filePath);
+//                    throw new RuntimeException(ex);
+//                }
 
                 if (fullClassName.isBlank() && classPathApplicants.isEmpty()) {
                     showMessageDialog(project,
                             "Import for '" + className + "' not found. Declare import first", "Error", Messages.getErrorIcon());
+                    return;
                 } else {
                     Class<?> clazz = null;
                     try {
                         if (classPathApplicants.isEmpty()) {
-//                            LOGGER.log(INFO, format("Trying find Class by name: [%s]...", fullClassName));
                             System.out.printf("Trying find Class by name: [%s]...%n", fullClassName);
                             clazz = Class.forName(fullClassName);
                         } else {
                             for (String path : classPathApplicants) {
                                 try {
                                     String fullApplicantPath = path + PACKAGE_DELIMITER + className;
-//                                    LOGGER.log(INFO, format("Trying find Class by name: [%s]...", fullApplicantPath));
                                     System.out.printf("Trying find Class by name: [%s]...%n", fullApplicantPath);
                                     clazz = Class.forName(fullApplicantPath);
                                     break;
                                 } catch (ClassNotFoundException ex) {
-//                                    LOGGER.log(INFO, "No such file...");
                                     System.out.println("No such file...");
                                     // just try next path applicant
                                 }
@@ -201,22 +185,22 @@ public class ExploreClassAction extends AnAction {
                                 "Class " + fullClassName + "was not found in classpath", "Error", Messages.getErrorIcon());
                         return;
                     }
-//                    LOGGER.log(INFO, format("Defined Class: [%s]", clazz.getCanonicalName()));
                     System.out.printf("Defined Class: [%s]%n", clazz);
 
                     List<String> methodList = getMethodList(clazz, inputType);
-                    int spacesNumber = getTabsNumber(document, caretOffset);
-                    String generatedCode = getGeneratedString(userInput, getIndent(spacesNumber), methodList);
-                    document.replaceString(caretOffset - userInput.length() - 1, caretOffset, generatedCode);
+                    if (methodList.size() > 0) {
+                        int spacesNumber = getTabsNumber(document, caretOffset);
+                        String generatedCode = getGeneratedString(userInput, getIndent(spacesNumber), methodList);
+                        document.replaceString(caretOffset - userInput.length() - 1, caretOffset, generatedCode);
+                    }
                 }
             } else {
                 showMessageDialog(project,
                         "Caret position can't be defined", "Error", Messages.getErrorIcon());
             }
 //            PsiClass psiClass = PsiTreeUtil.getParentOfType(elementAtCaret, PsiClass.class);
-        });
+        };
     }
-
     private String getIndent(int indentNumber) {
         final StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < indentNumber; i++) {
@@ -251,7 +235,6 @@ public class ExploreClassAction extends AnAction {
 
     private List<String> getMethodList(Class<?> clazz, InputType inputType) {
         if (inputType == TYPE) {
-//            LOGGER.log(INFO, "Collecting static methods...");
             if (exploreConfig.needParams()) {
                 return Arrays
                         .stream(clazz.getMethods())
@@ -268,16 +251,13 @@ public class ExploreClassAction extends AnAction {
                         .collect(toList());
             }
         }
-//        if (inputType == OBJECT) {
-//            LOGGER.log(INFO, "Collecting virtual methods...");
-            System.out.println("Collecting unique virtual methods...");
-            return Arrays
-                    .stream(clazz.getMethods())
-                    .filter(ReflectionUtils::isVirtual)
-                    .map(Method::getName)
-                    .distinct()
-                    .collect(toList());
-//        }
+        System.out.println("Collecting unique virtual methods...");
+        return Arrays
+                .stream(clazz.getMethods())
+                .filter(ReflectionUtils::isVirtual)
+                .map(Method::getName)
+                .distinct()
+                .collect(toList());
     }
 
     private int getTabsNumber(Document document, int caretOffset) {
@@ -296,7 +276,6 @@ public class ExploreClassAction extends AnAction {
                 indentCount++;
             }
         }
-//        LOGGER.log(INFO, format("Defined %s tabs", tabCount));
         System.out.printf("Defined %s spaces%n", indentCount);
         return indentCount;
     }
@@ -318,12 +297,10 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
-// TODO: 28.02.2024 fix for 0 methods
-// TODO: 28.02.2024 fix for import set changing
 // TODO: 28.02.2024 fix standard library search
 // TODO: 28.02.2024 fix for different caret position
 // TODO: 28.02.2024 fix for not public methods
-// TODO: 27.02.2024 Generate compile-safe code for virtual methods
+// TODO: 27.02.2024 Generate compile-safe code for virtual methods(for class/obj input)
 // TODO: 27.02.2024 Generate checkers(return boolean)
 // TODO: 27.02.2024 Generate getters(startsWith "get..")
 // TODO: 27.02.2024 Generate setters(startsWith "set..")

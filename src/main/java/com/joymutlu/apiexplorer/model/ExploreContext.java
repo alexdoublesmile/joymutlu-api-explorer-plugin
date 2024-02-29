@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.toMap;
 
 public class ExploreContext {
     private List<Method> API = new ArrayList<>();
+    private Class<?> exploreClass;
 
     private String userInput;
     private InputType inputType;
@@ -25,6 +26,10 @@ public class ExploreContext {
     private boolean needParams;
     private boolean needParentApi = true;
     private boolean needReturnValues;
+
+    public Class<?> getExploreClass() {
+        return exploreClass;
+    }
 
     public boolean needReturnValues() {
         return needReturnValues;
@@ -85,6 +90,7 @@ public class ExploreContext {
     }
 
     public void buildApi(Class<?> clazz) {
+        exploreClass = clazz;
         switch (inputType) {
             case TYPE: setApi(addStaticApi(clazz));
                 break;

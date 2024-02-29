@@ -14,6 +14,8 @@ import com.joymutlu.apiexplorer.exception.NoImportException;
 import com.joymutlu.apiexplorer.exception.NotImplementedException;
 import com.joymutlu.apiexplorer.exception.UnknownInputException;
 import com.joymutlu.apiexplorer.model.ExploreContext;
+import com.joymutlu.apiexplorer.model.InputType;
+import com.joymutlu.apiexplorer.util.ImportUtils;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -41,7 +43,7 @@ public class ExploreClassAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-        System.out.println("API Exploring triggered.");
+        System.out.println("-------- API Exploring triggered --------");
         exploreCtx = buildExploreContext(e);
 
         Editor editor = e.getRequiredData(EDITOR);
@@ -90,6 +92,12 @@ public class ExploreClassAction extends AnAction {
     }
 
     private String generateApiString(ExploreContext ctx) {
+        if (ctx.getAPI().size() == 0) {
+            showMessageDialog(project,
+                    format("No %sAPI for %s", ctx.getInputType() == InputType.TYPE ? "static " : "", ctx.getExploreClass()),
+                    "Info", getInformationIcon());
+            return "";
+        }
         System.out.printf("Generating %d methods for %s with %d spaces each%n", ctx.getAPI().size(), ctx.getUserInput(), ctx.getIndent().length());
 
         StringBuilder sb = new StringBuilder();
@@ -107,7 +115,9 @@ public class ExploreClassAction extends AnAction {
     }
 
     private void updateEditor(String generatedCode, ExploreContext ctx) {
-        document.replaceString(caret - ctx.getUserInput().length() - 1, caret, generatedCode);
+        if (!generatedCode.isBlank()) {
+            document.replaceString(caret - ctx.getUserInput().length() - 1, caret, generatedCode);
+        }
     }
 
     private List<String> getClassPathApplicants(List<String> importList) {
@@ -117,9 +127,11 @@ public class ExploreClassAction extends AnAction {
                 .map(s -> s.substring(IMPORT_STRING_PREFIX.length(), s.length() - ASTERISK_DECLARATION.length()))
                 .collect(toList());
 
+        ImportUtils.addDefaultPackages(classPathApplicants);
         System.out.println(classPathApplicants.isEmpty()
                 ? "No asterisk declarations in imports"
                 : format("Path applicants: [%s]", classPathApplicants));
+
         return classPathApplicants;
     }
 
@@ -240,17 +252,15 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
-// TODO: 28.02.2024 fix standard library search
-// TODO: 27.02.2024 Generate compile-safe code for virtual methods(for class/obj input)
+// TODO: 27.02.2024 Generate code for virtual methods(for obj input)
+// TODO: 27.02.2024 Generate all methods with overload & some params
+// TODO: 27.02.2024 Generate all methods with overload, params & return var
+// TODO: 27.02.2024 Generate with deprecated or not
 // TODO: 27.02.2024 Generate checkers(return boolean)
 // TODO: 27.02.2024 Generate getters(startsWith "get..")
 // TODO: 27.02.2024 Generate setters(startsWith "set..")
-// TODO: 27.02.2024 Generate all methods(incl.static,incl.parent, incl. deprecated)
-// TODO: 27.02.2024 Generate all methods with overload & some params
-// TODO: 27.02.2024 Generate all methods with overload, params & return var
+// TODO: 29.02.2024 add different sorting strategies for methods
 // TODO: 27.02.2024 Generate all method tree(depth) with default params
-// TODO: 27.02.2024 Handle potential errors (e.g., invalid PSI elements)
 // TODO: 27.02.2024 Provide options for customizing default parameters
-// TODO: 27.02.2024 Provide options for method filtering
 // TODO: 27.02.2024 Test the plugin thoroughly in different scenarios
-// TODO: 27.02.2024 Consider using a templating library for more complex code generation. Register the action with a custom live template
+// TODO: 27.02.2024 Provide options for method filtering

@@ -5,6 +5,7 @@ import com.joymutlu.apiexplorer.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -104,11 +105,15 @@ public class ExploreContext {
         final List<Method> result = Arrays
                 .stream(clazz.getMethods())
                 .filter(ReflectionUtils::isVirtual)
-                .collect(Collectors.toList());
+                .filter(ReflectionUtils::isNotAbstract)
+                .collect(toList());
 
-        final Class<?> parent = exploreClass.getSuperclass();
+        final Class<?> parent = clazz.getSuperclass();
+        System.out.printf("Parent of %s - %s%n", clazz, parent);
         if (needParentApi && parent != null) {
-            result.addAll(getVirtualApi(parent));
+            final List<Method> parentMethods = getVirtualApi(parent);
+            System.out.printf("Adding %d public non-abstract methods from %s to %s%n", parentMethods.size(), parent, clazz);
+            result.addAll(parentMethods);
         }
         return result;
     }

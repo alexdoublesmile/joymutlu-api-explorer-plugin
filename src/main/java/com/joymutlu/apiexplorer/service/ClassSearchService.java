@@ -33,10 +33,10 @@ public final class ClassSearchService {
 
     private String defineClassFromObject(ExploreContext ctx, CharSequence editorCode) throws NoInitializingLineException {
         final String input = ctx.getUserInput();
-        System.out.printf("Trying to define object [%s]...%n", input);
+        System.out.printf("Defining object [%s] type...%n", input);
         String line = StringUtils.findInitializingLine(editorCode, input)
                 .orElseThrow(NoInitializingLineException::new);
-        System.out.printf("Initializing line: [%s]%n", line);
+        System.out.printf("Initialization line: [%s]%n", line);
 
         String objectType = "";
         final String[] lineElements = line.split(" ");
@@ -44,6 +44,13 @@ public final class ClassSearchService {
             String element = lineElements[i];
             if (element.equals(input)) {
                 objectType = lineElements[i - 1];
+            }
+        }
+
+        for (int i = 0; i < objectType.length(); i++) {
+            final char ch = objectType.charAt(i);
+            if (ch == '<') {
+                objectType = objectType.substring(0, i);
             }
         }
         return objectType;

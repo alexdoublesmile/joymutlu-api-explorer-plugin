@@ -79,6 +79,7 @@ public class ExploreClassAction extends AnAction {
     }
 
     private String defineUserInput() {
+        System.out.println("Defining user input...");
         final PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
         final int lastElementOffset = caret - 2;
         String userInput = "";
@@ -93,7 +94,7 @@ public class ExploreClassAction extends AnAction {
     }
 
     private int getSpacesNumber(Document document, int caretOffset) {
-        System.out.println("Defining indent...");
+        System.out.println("Capturing line...");
 
         final int lineNumber = document.getLineNumber(caretOffset);
         final int lineStartOffset = document.getLineStartOffset(lineNumber);

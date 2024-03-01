@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toList;
 public final class ImportUtils {
     public static List<String> getImportList(CharSequence editorCode) {
         final ArrayList<String> importList = new ArrayList<>();
-        System.out.println("Scanning imports to define Full Class name...");
+        System.out.println("Scanning imports...");
         Scanner scanner = new Scanner(editorCode.toString()).useDelimiter("\n");
         while (scanner.hasNext()) {
             String line = scanner.next();

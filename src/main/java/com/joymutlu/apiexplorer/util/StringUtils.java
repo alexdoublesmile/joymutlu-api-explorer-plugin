@@ -35,13 +35,15 @@ public final class StringUtils {
     }
 
     public static int calcSpaces(String line, int offset) {
+        System.out.println("Defining indent...");
+
         int indentCount = 0;
         for (int i = 0; i < offset && i < line.length(); i++) {
             if (line.charAt(i) == ' ') {
                 indentCount++;
             }
         }
-        System.out.printf("Defined %s spaces%n", indentCount);
+        System.out.printf("Defined indent by %s spaces%n", indentCount);
         return indentCount;
     }
 

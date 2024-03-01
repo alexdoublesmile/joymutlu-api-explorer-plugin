@@ -1,6 +1,10 @@
 package com.joymutlu.apiexplorer.util;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Scanner;
+
+import static java.util.Optional.empty;
 
 public final class StringUtils {
     public static String getArgDefaultValuesString(List<String> argTypes) {
@@ -39,5 +43,17 @@ public final class StringUtils {
         }
         System.out.printf("Defined %s spaces%n", indentCount);
         return indentCount;
+    }
+
+    public static Optional<String> findInitializingLine(CharSequence editorCode, String objectName) {
+        Scanner scanner = new Scanner(editorCode.toString());
+        String line = "";
+        while (scanner.hasNextLine()) {
+            line = scanner.nextLine();
+            if (line.contains(objectName + ";") || line.contains(objectName + " =")) {
+                return Optional.of(line);
+            }
+        }
+        return empty();
     }
 }

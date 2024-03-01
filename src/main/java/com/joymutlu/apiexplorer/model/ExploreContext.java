@@ -76,6 +76,7 @@ public class ExploreContext {
         exploreClass = clazz;
         switch (inputType) {
             case TYPE: api = filterApi(getStaticApi(clazz));
+            break;
             case OBJECT: api = filterApi(getVirtualApi(clazz));
         };
     }

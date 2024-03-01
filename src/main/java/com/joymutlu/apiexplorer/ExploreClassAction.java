@@ -72,7 +72,7 @@ public class ExploreClassAction extends AnAction {
 
             } catch (UnknownInputException | NoImportException | NoClassException e) {
                 showMessageDialog(project, e.getMessage(), "Error", getErrorIcon());
-            } catch (NotImplementedException | NoApiException e) {
+            } catch (NoInitializingLineException | NoApiException e) {
                 showMessageDialog(project, e.getMessage(), "Info", getInformationIcon());
             }
         };
@@ -112,7 +112,6 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
-// TODO: 27.02.2024 Generate code for virtual methods(for obj input)
 // TODO: 27.02.2024 Generate all methods with overload & some params
 // TODO: 27.02.2024 Generate all methods with overload, params & return var
 // TODO: 27.02.2024 Generate with deprecated or not

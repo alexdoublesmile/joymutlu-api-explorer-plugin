@@ -2,11 +2,12 @@ package com.joymutlu.apiexplorer.service;
 
 import com.joymutlu.apiexplorer.exception.NoClassException;
 import com.joymutlu.apiexplorer.exception.NoImportException;
-import com.joymutlu.apiexplorer.exception.NotImplementedException;
+import com.joymutlu.apiexplorer.exception.NoInitializingLineException;
 import com.joymutlu.apiexplorer.exception.UnknownInputException;
 import com.joymutlu.apiexplorer.model.ExploreContext;
 import com.joymutlu.apiexplorer.util.ClassUtils;
 import com.joymutlu.apiexplorer.util.ImportUtils;
+import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public final class ClassSearchService {
                 .orElseThrow(() -> new NoImportException("Import for '" + className + "' class not found. Declare import first"));
     }
 
-    public String findClassName(ExploreContext ctx, CharSequence code) throws UnknownInputException, NotImplementedException {
+    public String findClassName(ExploreContext ctx, CharSequence code) throws UnknownInputException, NoInitializingLineException {
         switch (ctx.getInputType()) {
             case TYPE: return ctx.getUserInput();
             case OBJECT: return defineClassFromObject(ctx, code);
@@ -30,10 +31,21 @@ public final class ClassSearchService {
         }
     }
 
-    private String defineClassFromObject(ExploreContext ctx, CharSequence code) throws NotImplementedException {
-        System.out.printf("Trying to define object [%s]...%n", ctx.getUserInput());
-        // TODO: 28.02.2024 find place object was init
-        // TODO: 28.02.2024 return type of this expression
-        throw new NotImplementedException("Objects defining is not implemented in current version");
+    private String defineClassFromObject(ExploreContext ctx, CharSequence editorCode) throws NoInitializingLineException {
+        final String input = ctx.getUserInput();
+        System.out.printf("Trying to define object [%s]...%n", input);
+        String line = StringUtils.findInitializingLine(editorCode, input)
+                .orElseThrow(NoInitializingLineException::new);
+        System.out.printf("Initializing line: [%s]%n", line);
+
+        String objectType = "";
+        final String[] lineElements = line.split(" ");
+        for (int i = 0; i < lineElements.length; i++) {
+            String element = lineElements[i];
+            if (element.equals(input)) {
+                objectType = lineElements[i - 1];
+            }
+        }
+        return objectType;
     }
 }

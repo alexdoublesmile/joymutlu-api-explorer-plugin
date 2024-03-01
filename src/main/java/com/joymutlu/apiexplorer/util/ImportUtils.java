@@ -24,7 +24,7 @@ public final class ImportUtils {
     }
 
     public static List<String> getAsteriskDeclarations(List<String> importList) {
-        System.out.println("Collecting asterisk declarations...");
+        System.out.println("Collecting asterisk and default declarations...");
         List<String> classPathApplicants = importList.stream()
                 .filter(s -> s.endsWith(ASTERISK_DECLARATION))
                 .map(s -> s.substring(IMPORT_STRING_PREFIX.length(), s.length() - ASTERISK_DECLARATION.length()))

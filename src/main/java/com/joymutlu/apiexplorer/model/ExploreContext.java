@@ -5,9 +5,7 @@ import com.joymutlu.apiexplorer.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.joymutlu.apiexplorer.model.InputType.*;
 import static java.lang.Character.isLetter;
@@ -17,27 +15,15 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public class ExploreContext {
-    private final boolean needParams;
-    private final boolean needReturnValues;
-    private final boolean needParentApi;
-    private final ApiViewType apiViewType;
+    private final ExploreConfig config;
     private String userInput;
     private InputType inputType;
     private String indent;
     private Class<?> exploreClass;
     private List<Method> api = new ArrayList<>();
 
-    public ExploreContext(
-            boolean needParams,
-            boolean needReturnValues,
-        boolean needParentApi
-    ) {
-        this.needParams = needParams;
-        this.needReturnValues = needReturnValues;
-        this.needParentApi = needParentApi;
-        apiViewType = needParams
-                ? this.needReturnValues ? ApiViewType.FULL : ApiViewType.METHOD_CALL
-                : ApiViewType.METHOD_NAME;
+    public ExploreContext(ExploreConfig config) {
+        this.config = config;
     }
 
     public String getUserInput() {
@@ -76,17 +62,28 @@ public class ExploreContext {
     public void setApi(Class<?> clazz) {
         exploreClass = clazz;
         switch (inputType) {
-            case TYPE: api = filterApi(getStaticApi(clazz));
+            case TYPE: api = filterDeprecated(filterUnique(getStaticApi(clazz)));
             break;
-            case OBJECT: api = filterApi(getVirtualApi(clazz));
+            case OBJECT: api = filterDeprecated(filterUnique(getVirtualApi(clazz)));
         };
     }
 
-    private List<Method> filterApi(List<Method> methods) {
-        return needParams ? methods : getWithoutOverloaded(methods);
+    private List<Method> filterDeprecated(List<Method> methods) {
+        return config.withDeprecated() ? methods : removeDeprecated(methods);
     }
 
-    private List<Method> getWithoutOverloaded(List<Method> methods) {
+    private List<Method> filterUnique(List<Method> methods) {
+        return config.withArguments() ? methods : removeOverloads(methods);
+    }
+
+    private List<Method> removeDeprecated(List<Method> methods) {
+        System.out.println("Removing deprecated methods...");
+        return methods.stream()
+                .filter(ReflectionUtils::isNotDeprecated)
+                .collect(toList());
+    }
+
+    private List<Method> removeOverloads(List<Method> methods) {
         System.out.println("Removing overloaded methods...");
         return new ArrayList<>(methods.stream()
                 .collect(toMap(Method::getName, identity(), (m1, m2) -> m1))
@@ -106,16 +103,20 @@ public class ExploreContext {
                 .stream(clazz.getMethods())
                 .filter(ReflectionUtils::isVirtual)
                 .filter(ReflectionUtils::isNotAbstract)
+                .filter(ReflectionUtils::isNotObjectMethod)
                 .collect(toList());
 
         final Class<?> parent = clazz.getSuperclass();
-        System.out.printf("Parent of %s - %s%n", clazz, parent);
-        if (needParentApi && parent != null) {
+        if (config.withParentApi() && !isObjectClass(parent)) {
             final List<Method> parentMethods = getVirtualApi(parent);
             System.out.printf("Adding %d public non-abstract methods from %s to %s%n", parentMethods.size(), parent, clazz);
             result.addAll(parentMethods);
         }
         return result;
+    }
+
+    private boolean isObjectClass(Class<?> parent) {
+        return parent.getName().equals("java.lang.Object");
     }
 
     private InputType setInputType(String input) {
@@ -132,6 +133,10 @@ public class ExploreContext {
     }
 
     public ApiViewType getApiViewType() {
-        return apiViewType;
+        return config.getApiViewType();
+    }
+
+    public ExploreConfig getConfig() {
+        return config;
     }
 }

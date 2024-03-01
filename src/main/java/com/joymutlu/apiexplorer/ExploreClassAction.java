@@ -9,6 +9,7 @@ import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.joymutlu.apiexplorer.exception.*;
+import com.joymutlu.apiexplorer.model.ExploreConfig;
 import com.joymutlu.apiexplorer.model.ExploreContext;
 import com.joymutlu.apiexplorer.service.ClassSearchService;
 import com.joymutlu.apiexplorer.service.CodeGenerationService;
@@ -47,8 +48,12 @@ public class ExploreClassAction extends AnAction {
     }
 
     private ExploreContext buildExploreContext(AnActionEvent e) {
-        final ExploreContext ctx = new ExploreContext(false, false, true);
-        return ctx;
+        return new ExploreContext(ExploreConfig.builder()
+                .withDeprecated(true)
+                .withArguments(true)
+                .withReturnValues(false)
+                .withParentApi(true, false)
+                .build());
     }
 
     private Runnable generateAPI() {
@@ -113,14 +118,20 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
+// TODO: 01.03.2024 Create all variations of using plugin
+// TODO: 01.03.2024 Fix arrays declaration
 // TODO: 27.02.2024 Generate all methods with overload & some params
 // TODO: 27.02.2024 Generate all methods with overload, params & return var
-// TODO: 27.02.2024 Generate with deprecated or not
 // TODO: 27.02.2024 Generate checkers(return boolean)
 // TODO: 27.02.2024 Generate getters(startsWith "get..")
 // TODO: 27.02.2024 Generate setters(startsWith "set..")
 // TODO: 29.02.2024 add different sorting strategies for methods
-// TODO: 27.02.2024 Generate all method tree(depth) with default params
-// TODO: 27.02.2024 Provide options for customizing default parameters
-// TODO: 27.02.2024 Test the plugin thoroughly in different scenarios
 // TODO: 27.02.2024 Provide options for method filtering
+// TODO: 27.02.2024 Provide options for customizing default parameters
+
+// TODO: 01.03.2024 Generate API after several references declaration
+// TODO: 01.03.2024 Generate API after var declaration
+// TODO: 01.03.2024 Generate API after method call
+// TODO: 01.03.2024 Generate API after static/non-static direct field call
+// TODO: 27.02.2024 Generate all method tree(depth) with default params
+// TODO: 27.02.2024 Test the plugin thoroughly in different scenarios

@@ -14,7 +14,7 @@ public final class ClassUtils {
         if (className.isBlank()) {
             return empty();
         } else {
-            System.out.printf("Trying find Class by name: [%s]...%n", className);
+            System.out.printf("Trying find Class by name [%s]...%n", className);
             try {
                 return of(Class.forName(className));
             } catch (ClassNotFoundException e) {
@@ -28,10 +28,9 @@ public final class ClassUtils {
             for (String path : pathList) {
                 try {
                     String fullClassName = path + PACKAGE_DELIMITER + className;
-                    System.out.printf("Trying find Class by name: [%s]...%n", fullClassName);
+                    System.out.printf("Trying find Class by name [%s]...%n", fullClassName);
                     return of(Class.forName(fullClassName));
                 } catch (ClassNotFoundException ex) {
-                    System.out.println("No such file...");
                     // just try next applicant
                     // TODO: 01.03.2024 find better approach
                 }

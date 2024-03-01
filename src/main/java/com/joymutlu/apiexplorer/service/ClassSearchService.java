@@ -9,6 +9,7 @@ import com.joymutlu.apiexplorer.util.ClassUtils;
 import com.joymutlu.apiexplorer.util.ImportUtils;
 import com.joymutlu.apiexplorer.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +40,8 @@ public final class ClassSearchService {
         System.out.printf("Initialization line: [%s]%n", line);
 
         String objectType = "";
-        final String[] lineElements = line.split(" ");
+        final String[] lineElements = line.trim().split(" |;");
+        System.out.printf("Elements: [%s]%n", Arrays.toString(lineElements));
         for (int i = 0; i < lineElements.length; i++) {
             String element = lineElements[i];
             if (element.equals(input)) {

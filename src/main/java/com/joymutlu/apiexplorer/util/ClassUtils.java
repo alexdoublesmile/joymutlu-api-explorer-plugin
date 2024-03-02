@@ -4,12 +4,24 @@ import com.joymutlu.apiexplorer.exception.NoClassException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.joymutlu.apiexplorer.util.EditorConstants.PACKAGE_DELIMITER;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public final class ClassUtils {
+    public static final Set<String> PRIMITIVE_SET = Set.of(
+            "byte",
+            "short",
+            "int",
+            "long",
+            "float",
+            "double",
+            "char",
+            "boolean"
+    );
+
     public static Optional<Class<?>> findClassByName(String className) throws NoClassException {
         if (className.isBlank()) {
             return empty();

@@ -52,7 +52,7 @@ public final class StringUtils {
         String line = "";
         while (scanner.hasNextLine()) {
             line = scanner.nextLine();
-            if (line.contains(" " + objectName + ";") || line.contains(" " + objectName + " =")) {
+            if (line.contains(objectName) ) {
                 return Optional.of(line);
             }
         }

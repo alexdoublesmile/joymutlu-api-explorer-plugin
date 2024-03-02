@@ -94,6 +94,7 @@ public class ExploreContext {
         System.out.printf("Collecting all public static methods from %s...%n", clazz);
         return Arrays.stream(clazz.getMethods())
                 .filter(ReflectionUtils::isStatic)
+                .filter(ReflectionUtils::isNotObjectMethod)
                 .collect(toList());
     }
 
@@ -102,21 +103,29 @@ public class ExploreContext {
         final List<Method> result = Arrays
                 .stream(clazz.getMethods())
                 .filter(ReflectionUtils::isVirtual)
-                .filter(ReflectionUtils::isNotAbstract)
+//                .filter(ReflectionUtils::isNotAbstract)
                 .filter(ReflectionUtils::isNotObjectMethod)
                 .collect(toList());
 
-        final Class<?> parent = clazz.getSuperclass();
-        if (config.withParentApi() && !isObjectClass(parent)) {
-            final List<Method> parentMethods = getVirtualApi(parent);
-            System.out.printf("Adding %d public non-abstract methods from %s to %s%n", parentMethods.size(), parent, clazz);
-            result.addAll(parentMethods);
+        if (config.withParentApi()) {
+            final Class<?> parent = clazz.getSuperclass();
+            final List<Class<?>> interfaces = Arrays.asList(clazz.getInterfaces());
+            if (isNotTopClass(parent)) {
+                final List<Method> parentMethods = getVirtualApi(parent);
+                System.out.printf("Adding %d public non-abstract methods from %s to %s%n", parentMethods.size(), parent, clazz);
+                result.addAll(parentMethods);
+            }
+            interfaces.forEach(iface -> {
+                final List<Method> subInterfaceApi = getVirtualApi(iface);
+                System.out.printf("Adding %d public non-abstract methods from %s to %s%n", subInterfaceApi.size(), iface, clazz);
+                result.addAll(subInterfaceApi);
+            });
         }
         return result;
     }
 
-    private boolean isObjectClass(Class<?> parent) {
-        return parent.getName().equals("java.lang.Object");
+    private boolean isNotTopClass(Class<?> parent) {
+        return parent != null && !parent.getName().equals("java.lang.Object");
     }
 
     private InputType setInputType(String input) {

@@ -65,5 +65,6 @@ public final class ImportUtils {
 
     private static void addDefaultPackages(List<String> classPathApplicants) {
         classPathApplicants.add("java.lang");
+        classPathApplicants.add("java.lang.reflect");
     }
 }

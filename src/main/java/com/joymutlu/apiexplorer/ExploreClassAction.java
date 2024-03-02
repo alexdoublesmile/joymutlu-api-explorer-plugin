@@ -50,7 +50,7 @@ public class ExploreClassAction extends AnAction {
     private ExploreContext buildExploreContext(AnActionEvent e) {
         return new ExploreContext(ExploreConfig.builder()
                 .withDeprecated(true)
-                .withArguments(true)
+                .withArguments(false)
                 .withReturnValues(false)
                 .withParentApi(true, false)
                 .build());
@@ -118,8 +118,6 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
-// TODO: 01.03.2024 Create all variations of using plugin
-// TODO: 01.03.2024 Fix arrays declaration
 // TODO: 27.02.2024 Generate all methods with overload & some params
 // TODO: 27.02.2024 Generate all methods with overload, params & return var
 // TODO: 27.02.2024 Generate checkers(return boolean)
@@ -128,9 +126,8 @@ public class ExploreClassAction extends AnAction {
 // TODO: 29.02.2024 add different sorting strategies for methods
 // TODO: 27.02.2024 Provide options for method filtering
 // TODO: 27.02.2024 Provide options for customizing default parameters
+// TODO: 01.03.2024 Fix errors
 
-// TODO: 01.03.2024 Generate API after several references declaration
-// TODO: 01.03.2024 Generate API after var declaration
 // TODO: 01.03.2024 Generate API after method call
 // TODO: 01.03.2024 Generate API after static/non-static direct field call
 // TODO: 27.02.2024 Generate all method tree(depth) with default params

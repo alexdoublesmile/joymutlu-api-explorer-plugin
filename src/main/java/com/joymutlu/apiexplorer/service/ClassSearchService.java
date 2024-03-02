@@ -28,14 +28,14 @@ public final class ClassSearchService {
 
     public String findClassName(ExploreContext ctx, CharSequence code) throws UnknownInputException, NoInitializingLineException {
         switch (ctx.getInputType()) {
-            case TYPE: return ctx.getUserInput();
+            case TYPE: return ctx.getUserInput().value();
             case OBJECT: return defineClassFromObject(ctx, code);
             default: throw new UnknownInputException();
         }
     }
 
     private String defineClassFromObject(ExploreContext ctx, CharSequence editorCode) throws NoInitializingLineException {
-        final String input = ctx.getUserInput();
+        final String input = ctx.getUserInput().value();
         System.out.printf("Defining object [%s] type...%n", input);
         String line = StringUtils.findInitializingLine(editorCode, input)
                 .orElseThrow(NoInitializingLineException::new);

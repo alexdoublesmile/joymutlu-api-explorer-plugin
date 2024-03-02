@@ -10,6 +10,7 @@ import com.intellij.psi.PsiFile;
 import com.joymutlu.apiexplorer.exception.*;
 import com.joymutlu.apiexplorer.model.ExploreConfig;
 import com.joymutlu.apiexplorer.model.ExploreContext;
+import com.joymutlu.apiexplorer.model.UserInput;
 import com.joymutlu.apiexplorer.service.ClassSearchService;
 import com.joymutlu.apiexplorer.service.CodeGenerationService;
 import com.joymutlu.apiexplorer.util.ImportUtils;
@@ -89,33 +90,41 @@ public class ExploreClassAction extends AnAction {
         };
     }
 
-    private String defineUserInput(String line, int caretPosition) {
+    private UserInput defineUserInput(String line, int lineCaretPosition) {
         System.out.println("Defining user input...");
-        String userInput = "";
-        for (int i = caretPosition - 1; i >= 0; i--) {
+        String input = "";
+        int startPosition = caret;
+        int endPosition = caret;
+        int leftStep = 0;
+        int rightStep = 0;
+        for (int i = lineCaretPosition - 1; i >= 0; i--) {
             final char c = line.charAt(i);
             if (c == ' ') {
                 break;
             }
             if (c != '.') {
-                userInput = c + userInput;
+                input = c + input;
             }
+            leftStep++;
         }
-        for (int i = caretPosition; i < line.length(); i++) {
+        for (int i = lineCaretPosition; i < line.length(); i++) {
             final char c = line.charAt(i);
             if (c == ' ') {
                 break;
             }
             if (c != '.') {
-                userInput = userInput + c;
+                input = input + c;
             }
+            rightStep++;
         }
+        startPosition -= leftStep;
+        endPosition += rightStep;
 //        final PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
 //        String userInput = "";
 //        if (psiFile != null) {
 //            userInput = findUserInput(psiFile, caret - 1).getText();
 //        }
-        return userInput;
+        return new UserInput(input, startPosition, endPosition);
     }
 
     private PsiElement findUserInput(PsiFile psiFile, int caret) {
@@ -128,7 +137,10 @@ public class ExploreClassAction extends AnAction {
 
     private void updateEditor(String generatedCode, ExploreContext ctx) {
         if (!generatedCode.isBlank()) {
-            document.replaceString(caret - ctx.getUserInput().length() - 1, caret, generatedCode);
+            document.replaceString(
+                    ctx.getUserInput().startPosition(),
+                    ctx.getUserInput().endPosition(),
+                    generatedCode);
         }
     }
 }

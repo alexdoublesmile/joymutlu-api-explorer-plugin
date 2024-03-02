@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.toMap;
 
 public class ExploreContext {
     private final ExploreConfig config;
-    private String userInput;
+    private UserInput userInput;
     private InputType inputType;
     private String indent;
     private Class<?> exploreClass;
@@ -27,13 +27,13 @@ public class ExploreContext {
         this.config = config;
     }
 
-    public String getUserInput() {
+    public UserInput getUserInput() {
         return userInput;
     }
 
-    public void setUserInput(String userInput) {
+    public void setUserInput(UserInput userInput) {
         this.userInput = userInput;
-        inputType = setInputType(userInput);
+        inputType = setInputType(userInput.value());
     }
 
     public String getIndent() {

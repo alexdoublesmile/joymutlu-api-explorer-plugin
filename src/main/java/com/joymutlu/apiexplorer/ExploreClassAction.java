@@ -5,7 +5,6 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.joymutlu.apiexplorer.exception.*;
@@ -59,8 +58,15 @@ public class ExploreClassAction extends AnAction {
     private Runnable generateAPI() {
         return () -> {
             try {
-                exploreCtx.setUserInput(defineUserInput());
-                exploreCtx.setIndent(getSpacesNumber(document, caret));
+                System.out.println("Capturing line...");
+                final int lineNumber = document.getLineNumber(caret);
+                final int lineStartOffset = document.getLineStartOffset(lineNumber);
+                final int lineEndOffset = document.getLineEndOffset(lineNumber);
+                final String line = document.getText(new TextRange(lineStartOffset, lineEndOffset));
+                System.out.printf("Captured line %d: [%s]%n", lineNumber, line);
+
+                exploreCtx.setUserInput(defineUserInput(line, caret - lineStartOffset));
+                exploreCtx.setIndent(StringUtils.calcSpaces(line, caret));
                 System.out.printf("User input [%s] was defined as [%s] with indent size=[%d]%n",
                         exploreCtx.getUserInput(), exploreCtx.getInputType().name(), exploreCtx.getIndent().length());
 
@@ -83,32 +89,41 @@ public class ExploreClassAction extends AnAction {
         };
     }
 
-    private String defineUserInput() {
+    private String defineUserInput(String line, int caretPosition) {
         System.out.println("Defining user input...");
-        final PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
-        final int lastElementOffset = caret - 2;
         String userInput = "";
-
-        if (psiFile != null) {
-            PsiElement elementAtCaret = psiFile.findElementAt(lastElementOffset);
-            if (elementAtCaret != null) {
-                userInput = elementAtCaret.getText();
+        for (int i = caretPosition - 1; i >= 0; i--) {
+            final char c = line.charAt(i);
+            if (c == ' ') {
+                break;
+            }
+            if (c != '.') {
+                userInput = c + userInput;
             }
         }
+        for (int i = caretPosition; i < line.length(); i++) {
+            final char c = line.charAt(i);
+            if (c == ' ') {
+                break;
+            }
+            if (c != '.') {
+                userInput = userInput + c;
+            }
+        }
+//        final PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
+//        String userInput = "";
+//        if (psiFile != null) {
+//            userInput = findUserInput(psiFile, caret - 1).getText();
+//        }
         return userInput;
     }
 
-    private int getSpacesNumber(Document document, int caretOffset) {
-        System.out.println("Capturing line...");
-
-        final int lineNumber = document.getLineNumber(caretOffset);
-        final int lineStartOffset = document.getLineStartOffset(lineNumber);
-        final int lineEndOffset = document.getLineEndOffset(lineNumber);
-
-        final String line = document.getText(new TextRange(lineStartOffset, lineEndOffset));
-        System.out.printf("Captured line %d: [%s]%n", lineNumber, line);
-
-        return StringUtils.calcSpaces(line, caretOffset);
+    private PsiElement findUserInput(PsiFile psiFile, int caret) {
+        PsiElement elementAtCaret = psiFile.findElementAt(caret);
+        if (elementAtCaret == null) {
+            elementAtCaret = findUserInput(psiFile, caret - 1);
+        }
+        return elementAtCaret;
     }
 
     private void updateEditor(String generatedCode, ExploreContext ctx) {

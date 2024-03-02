@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.joymutlu.apiexplorer.model.InputType.*;
+import static com.joymutlu.apiexplorer.util.ClassUtils.isNotTopClass;
 import static java.lang.Character.isLetter;
 import static java.lang.Character.isLowerCase;
 import static java.util.function.Function.identity;
@@ -53,6 +54,27 @@ public class ExploreContext {
 
     public InputType getInputType() {
         return inputType;
+    }
+
+    private InputType setInputType(String input) {
+        char firstSymbol;
+        if (!input.isBlank() && isLetter(firstSymbol = input.charAt(0))) {
+            if (isLowerCase(firstSymbol)) {
+                return OBJECT;
+            } else {
+                return TYPE;
+            }
+        } else {
+            return UNKNOWN;
+        }
+    }
+
+    public ApiViewType getApiViewType() {
+        return config.getApiViewType();
+    }
+
+    public ExploreConfig getConfig() {
+        return config;
     }
 
     public List<Method> getApi() {
@@ -122,30 +144,5 @@ public class ExploreContext {
             });
         }
         return result;
-    }
-
-    private boolean isNotTopClass(Class<?> parent) {
-        return parent != null && !parent.getName().equals("java.lang.Object");
-    }
-
-    private InputType setInputType(String input) {
-        char firstSymbol;
-        if (!input.isBlank() && isLetter(firstSymbol = input.charAt(0))) {
-            if (isLowerCase(firstSymbol)) {
-                return OBJECT;
-            } else {
-                return TYPE;
-            }
-        } else {
-            return UNKNOWN;
-        }
-    }
-
-    public ApiViewType getApiViewType() {
-        return config.getApiViewType();
-    }
-
-    public ExploreConfig getConfig() {
-        return config;
     }
 }

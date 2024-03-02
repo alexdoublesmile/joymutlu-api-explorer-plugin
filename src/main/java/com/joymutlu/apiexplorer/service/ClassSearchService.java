@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static com.joymutlu.apiexplorer.util.ClassUtils.PRIMITIVE_SET;
+import static com.joymutlu.apiexplorer.util.StringUtils.*;
 
 public final class ClassSearchService {
     public Class<?> findClass(List<String> importList, String className) throws NoClassException, NoImportException {
@@ -44,12 +44,12 @@ public final class ClassSearchService {
         final String[] lineElements = line.trim().split("[ ;=(),]");
         System.out.printf("Elements: [%s]%n", Arrays.toString(lineElements));
 
-        String objectType = getType(lineElements, input);
+        String objectType = resolveType(lineElements, input);
         System.out.printf("Object type defined as [%s]%n", objectType);
         return objectType;
     }
 
-    private String getType(String[] elements, String referenceName) throws NoInitializingLineException {
+    private String resolveType(String[] elements, String referenceName) throws NoInitializingLineException {
         for (int i = 0; i < elements.length; i++) {
             String element = elements[i].trim();
             if (element.equals(referenceName)) {
@@ -57,8 +57,8 @@ public final class ClassSearchService {
                 if (typeDeclaration.isBlank() || isLowerCase(typeDeclaration)) {
                     typeDeclaration = resolveLowerCaseType(elements, i, typeDeclaration);
                 }
-                if (isComplexGeneric(typeDeclaration)) {
-                    typeDeclaration = filterGeneric(resolveComplexGeneric(elements, i - 1));
+                if (isGenericDeclaration(typeDeclaration)) {
+                    typeDeclaration = filterGeneric(resolveTypeFromGeneric(elements, i - 1));
                 }
                 return isArray(typeDeclaration) ? "Array" : filterGeneric(typeDeclaration);
             }
@@ -69,11 +69,7 @@ public final class ClassSearchService {
         throw new NoInitializingLineException();
     }
 
-    private boolean isComplexGeneric(String typeDeclaration) {
-        return typeDeclaration.endsWith(">");
-    }
-
-    private String resolveComplexGeneric(String[] elements, int idx) throws NoInitializingLineException {
+    private String resolveTypeFromGeneric(String[] elements, int idx) throws NoInitializingLineException {
         int depth = 0;
         for (int i = idx; i >= 0; i--) {
             final String element = elements[i];
@@ -100,16 +96,6 @@ public final class ClassSearchService {
         throw new NoInitializingLineException();
     }
 
-    private String filterGeneric(String typeDeclaration) {
-        for (int i = 0; i < typeDeclaration.length(); i++) {
-            final char ch = typeDeclaration.charAt(i);
-            if (ch == '<') {
-                return typeDeclaration.substring(0, i);
-            }
-        }
-        return typeDeclaration;
-    }
-
     private String resolveLowerCaseType(String[] elements, int idx, String typeDeclaration) throws NoInitializingLineException {
         if (!typeDeclaration.isBlank() && isArray(typeDeclaration)) {
             return "Array";
@@ -124,30 +110,5 @@ public final class ClassSearchService {
             }
         }
         throw new NoInitializingLineException();
-    }
-
-    private boolean isUndefined(String typeDeclaration) {
-        return isNotPrimitive(typeDeclaration) && !typeDeclaration.equals("var");
-    }
-
-    private boolean isNotPrimitive(String typeDeclaration) {
-        return !PRIMITIVE_SET.contains(typeDeclaration);
-    }
-
-    private boolean isLowerCase(String str) {
-        return Character.isLowerCase(str.charAt(0));
-    }
-
-    private boolean isUpperCase(String str) {
-        return Character.isUpperCase(str.charAt(0));
-    }
-
-    private boolean isDirtyVarargOrArray(String referenceElement, String referenceName) {
-        return referenceElement.contains("..." + referenceName)
-                || referenceElement.contains(referenceName + "[");
-    }
-
-    private boolean isArray(String type) {
-        return type.charAt(type.length() - 1) == ']';
     }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+import static com.joymutlu.apiexplorer.util.ClassUtils.PRIMITIVE_SET;
 import static java.util.Optional.empty;
 
 public final class StringUtils {
@@ -57,5 +58,44 @@ public final class StringUtils {
             }
         }
         return empty();
+    }
+
+    public static String filterGeneric(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            final char ch = str.charAt(i);
+            if (ch == '<') {
+                return str.substring(0, i);
+            }
+        }
+        return str;
+    }
+
+    public static boolean isGenericDeclaration(String str) {
+        return str.endsWith(">");
+    }
+
+    public static boolean isUndefined(String str) {
+        return isNotPrimitive(str) && !str.equals("var");
+    }
+
+    public static boolean isNotPrimitive(String str) {
+        return !PRIMITIVE_SET.contains(str);
+    }
+
+    public static boolean isLowerCase(String str) {
+        return Character.isLowerCase(str.charAt(0));
+    }
+
+    public static boolean isUpperCase(String str) {
+        return Character.isUpperCase(str.charAt(0));
+    }
+
+    public static boolean isDirtyVarargOrArray(String referenceElement, String referenceName) {
+        return referenceElement.contains("..." + referenceName)
+                || referenceElement.contains(referenceName + "[");
+    }
+
+    public static boolean isArray(String str) {
+        return str.charAt(str.length() - 1) == ']';
     }
 }

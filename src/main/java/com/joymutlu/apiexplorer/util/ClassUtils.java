@@ -50,4 +50,8 @@ public final class ClassUtils {
         }
         return empty();
     }
+
+    public static boolean isNotTopClass(Class<?> parent) {
+        return parent != null && !parent.getName().equals("java.lang.Object");
+    }
 }

@@ -70,12 +70,8 @@ public class ExploreConfig {
             return this;
         }
 
-        public ConfigBuilder withArguments(boolean withArguments) {
+        public ConfigBuilder withArgumentsAndReturns(boolean withArguments, boolean withReturnValues) {
             this.withArguments = withArguments;
-            return this;
-        }
-
-        public ConfigBuilder withReturnValues(boolean withReturnValues) {
             this.withReturnValues = withReturnValues;
             return this;
         }

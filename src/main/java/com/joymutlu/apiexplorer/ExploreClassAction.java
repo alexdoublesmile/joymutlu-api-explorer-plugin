@@ -38,8 +38,7 @@ public class ExploreClassAction extends AnAction {
     private ExploreContext buildExploreContext(AnActionEvent e) {
         return new ExploreContext(ExploreConfig.builder()
                 .withDeprecated(true)
-                .withArguments(true)
-                .withReturnValues(true)
+                .withArgumentsAndReturns(true, true)
                 .withParentApi(true, false)
                 .build());
     }
@@ -83,15 +82,7 @@ public class ExploreClassAction extends AnAction {
 }
 
 
-//Collection
-//[]
-//Function
-// IntFunction
-// ...
-// Comparator
 
-// TODO: 27.02.2024 Generate all methods with overload & some params
-// TODO: 27.02.2024 Generate all methods with overload, params & return var
 // TODO: 27.02.2024 Generate checkers(return boolean)
 // TODO: 27.02.2024 Generate getters(startsWith "get..")
 // TODO: 27.02.2024 Generate setters(startsWith "set..")

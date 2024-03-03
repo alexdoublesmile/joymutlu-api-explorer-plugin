@@ -14,6 +14,7 @@ import com.joymutlu.apiexplorer.service.ClassSearchService;
 import com.joymutlu.apiexplorer.service.CodeGenerationService;
 import com.joymutlu.apiexplorer.util.ImportUtils;
 
+import java.util.Collection;
 import java.util.List;
 
 import static com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR;
@@ -120,6 +121,14 @@ public class ExploreClassAction extends AnAction {
         }
     }
 }
+
+
+//Collection
+//[]
+//Function
+// IntFunction
+// ...
+// Comparator
 
 // TODO: 27.02.2024 Generate all methods with overload & some params
 // TODO: 27.02.2024 Generate all methods with overload, params & return var

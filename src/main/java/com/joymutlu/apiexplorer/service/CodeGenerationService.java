@@ -6,9 +6,11 @@ import com.joymutlu.apiexplorer.model.ExploreContext;
 import com.joymutlu.apiexplorer.model.InputType;
 import com.joymutlu.apiexplorer.strategy.CodeGenerationStrategy;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import static java.lang.String.format;
+import static java.util.Comparator.comparing;
 
 public final class CodeGenerationService {
     private final Map<ApiViewType, CodeGenerationStrategy> strategyMap;
@@ -21,8 +23,11 @@ public final class CodeGenerationService {
         if (ctx.getApi().isEmpty()) {
             throw new NoApiException(format("No %sAPI for %s", ctx.getInputType() == InputType.TYPE ? "static " : "", ctx.getExploreClass()));
         }
-        return ctx.getApi().stream()
-                .map(method -> strategyMap.get(ctx.getApiViewType()).generateApiLine(ctx, method))
+        return ctx.getApi().values()
+                .stream()
+                .sorted(comparing(Method::getName))
+                .map(method -> strategyMap.get(ctx.getApiViewType())
+                        .generateApiLine(ctx, method))
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
     }

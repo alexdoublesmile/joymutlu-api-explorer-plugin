@@ -6,7 +6,9 @@ import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.Character.isLowerCase;
 import static java.lang.String.format;
@@ -17,7 +19,7 @@ public class ExploreContext {
     private InputType inputType;
     private String indent;
     private Class<?> exploreClass;
-    private List<Method> api = new ArrayList<>();
+    private Map<MethodDeclaration, Method> api = new HashMap<>();
 
     public ExploreContext(ExploreConfig config) {
         this.config = config;
@@ -62,8 +64,8 @@ public class ExploreContext {
         return config;
     }
 
-    public List<Method> getApi() {
-        return new ArrayList<>(api);
+    public Map<MethodDeclaration, Method> getApi() {
+        return new HashMap<>(api);
     }
 
     public void setApi(Class<?> clazz) throws UnknownInputException {
@@ -77,11 +79,11 @@ public class ExploreContext {
         };
     }
 
-    private List<Method> filterDeprecated(List<Method> methods) {
+    private Map<MethodDeclaration, Method> filterDeprecated(Map<MethodDeclaration, Method> methods) {
         return config.withDeprecated() ? methods : ReflectionUtils.removeDeprecated(methods);
     }
 
-    private List<Method> filterUnique(List<Method> methods) {
+    private Map<MethodDeclaration, Method> filterUnique(Map<MethodDeclaration, Method> methods) {
         return config.withArguments() ? methods : ReflectionUtils.removeOverloads(methods);
     }
 }

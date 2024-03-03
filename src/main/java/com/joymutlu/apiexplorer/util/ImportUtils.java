@@ -12,13 +12,6 @@ public final class ImportUtils {
             "java.lang.reflect"
     );
 
-    public static List<String> getImportList(String editorCode) {
-        System.out.println("Scanning imports...");
-        return Arrays.stream(editorCode.split("\n"))
-                .filter(line -> line.startsWith(EditorConstants.IMPORT_STRING_PREFIX))
-                .toList();
-    }
-
     public static List<String> getPathList(List<String> importList) {
         System.out.println("Collecting asterisk and default declarations...");
 

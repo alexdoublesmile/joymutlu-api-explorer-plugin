@@ -71,7 +71,7 @@ public final class ReflectionUtils {
                 .filter(ReflectionUtils::isNotObjectMethod)
                 .collect(toMap(method ->
                         new MethodDeclaration(method.getName(), asList(method.getParameterTypes())),
-                        identity()));
+                        identity(), (m1, m2) -> m1));
 
         if (withParentApi) {
             final Class<?> parent = clazz.getSuperclass();

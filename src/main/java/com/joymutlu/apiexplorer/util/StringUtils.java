@@ -39,8 +39,9 @@ public final class StringUtils {
             case "boolean" : return "true";
             case "Character" :
             case "char" : return "'c'";
-            case "String" : return "str";
-            default: return "new Object()";
+            case "CharSequence" :
+            case "String" : return "\"str\"";
+            default: return "null";
         }
     }
 

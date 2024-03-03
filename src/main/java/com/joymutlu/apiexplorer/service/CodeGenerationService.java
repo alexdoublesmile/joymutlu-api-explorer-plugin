@@ -20,6 +20,7 @@ public final class CodeGenerationService {
     }
 
     public String generateApiString(ExploreContext ctx) throws NoApiException {
+        System.out.printf("Generating API from %d methods...%n", ctx.getApi().size());
         if (ctx.getApi().isEmpty()) {
             throw new NoApiException(format("No %sAPI for %s", ctx.getInputType() == InputType.TYPE ? "static " : "", ctx.getExploreClass()));
         }

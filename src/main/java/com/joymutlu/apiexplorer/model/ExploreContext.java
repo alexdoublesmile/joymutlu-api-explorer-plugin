@@ -1,19 +1,15 @@
 package com.joymutlu.apiexplorer.model;
 
+import com.joymutlu.apiexplorer.exception.UnknownInputException;
 import com.joymutlu.apiexplorer.util.ReflectionUtils;
+import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static com.joymutlu.apiexplorer.model.InputType.*;
-import static com.joymutlu.apiexplorer.util.ClassUtils.isNotTopClass;
-import static java.lang.Character.isLetter;
 import static java.lang.Character.isLowerCase;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.lang.String.format;
 
 public class ExploreContext {
     private final ExploreConfig config;
@@ -33,7 +29,7 @@ public class ExploreContext {
 
     public void setUserInput(UserInput userInput) {
         this.userInput = userInput;
-        inputType = setInputType(userInput.value());
+        setInputType(userInput.value());
     }
 
     public String getIndent() {
@@ -41,11 +37,7 @@ public class ExploreContext {
     }
 
     public void setIndent(int spacesNumber) {
-        final StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < spacesNumber; i++) {
-            stringBuilder.append(" ");
-        }
-        indent = stringBuilder.toString();
+        indent = format("%-" + spacesNumber + "s", "");
     }
 
     public Class<?> getExploreClass() {
@@ -56,17 +48,10 @@ public class ExploreContext {
         return inputType;
     }
 
-    private InputType setInputType(String input) {
-        char firstSymbol;
-        if (!input.isBlank() && isLetter(firstSymbol = input.charAt(0))) {
-            if (isLowerCase(firstSymbol)) {
-                return OBJECT;
-            } else {
-                return TYPE;
-            }
-        } else {
-            return UNKNOWN;
-        }
+    private void setInputType(String input) {
+        inputType = StringUtils.isUnknown(input)
+                ? InputType.UNKNOWN
+                : isLowerCase(input.charAt(0)) ? InputType.OBJECT : InputType.TYPE;
     }
 
     public ApiViewType getApiViewType() {
@@ -81,68 +66,22 @@ public class ExploreContext {
         return new ArrayList<>(api);
     }
 
-    public void setApi(Class<?> clazz) {
+    public void setApi(Class<?> clazz) throws UnknownInputException {
         exploreClass = clazz;
-        switch (inputType) {
-            case TYPE: api = filterDeprecated(filterUnique(getStaticApi(clazz)));
-            break;
-            case OBJECT: api = filterDeprecated(filterUnique(getVirtualApi(clazz)));
+        api = switch (inputType) {
+            case TYPE -> filterDeprecated(filterUnique(
+                    ReflectionUtils.getStaticApi(clazz)));
+            case OBJECT -> filterDeprecated(filterUnique(
+                    ReflectionUtils.getVirtualApi(clazz, config.withParentApi())));
+            default -> throw new UnknownInputException();
         };
     }
 
     private List<Method> filterDeprecated(List<Method> methods) {
-        return config.withDeprecated() ? methods : removeDeprecated(methods);
+        return config.withDeprecated() ? methods : ReflectionUtils.removeDeprecated(methods);
     }
 
     private List<Method> filterUnique(List<Method> methods) {
-        return config.withArguments() ? methods : removeOverloads(methods);
-    }
-
-    private List<Method> removeDeprecated(List<Method> methods) {
-        System.out.println("Removing deprecated methods...");
-        return methods.stream()
-                .filter(ReflectionUtils::isNotDeprecated)
-                .collect(toList());
-    }
-
-    private List<Method> removeOverloads(List<Method> methods) {
-        System.out.println("Removing overloaded methods...");
-        return new ArrayList<>(methods.stream()
-                .collect(toMap(Method::getName, identity(), (m1, m2) -> m1))
-                .values());
-    }
-
-    private List<Method> getStaticApi(Class<?> clazz) {
-        System.out.printf("Collecting all public static methods from %s...%n", clazz);
-        return Arrays.stream(clazz.getMethods())
-                .filter(ReflectionUtils::isStatic)
-                .filter(ReflectionUtils::isNotObjectMethod)
-                .collect(toList());
-    }
-
-    private List<Method> getVirtualApi(Class<?> clazz) {
-        System.out.printf("Collecting all public methods from %s...%n", clazz);
-        final List<Method> result = Arrays
-                .stream(clazz.getMethods())
-                .filter(ReflectionUtils::isVirtual)
-//                .filter(ReflectionUtils::isNotAbstract)
-                .filter(ReflectionUtils::isNotObjectMethod)
-                .collect(toList());
-
-        if (config.withParentApi()) {
-            final Class<?> parent = clazz.getSuperclass();
-            final List<Class<?>> interfaces = Arrays.asList(clazz.getInterfaces());
-            if (isNotTopClass(parent)) {
-                final List<Method> parentMethods = getVirtualApi(parent);
-                System.out.printf("Adding %d public non-abstract methods from %s to %s%n", parentMethods.size(), parent, clazz);
-                result.addAll(parentMethods);
-            }
-            interfaces.forEach(iface -> {
-                final List<Method> subInterfaceApi = getVirtualApi(iface);
-                System.out.printf("Adding %d public non-abstract methods from %s to %s%n", subInterfaceApi.size(), iface, clazz);
-                result.addAll(subInterfaceApi);
-            });
-        }
-        return result;
+        return config.withArguments() ? methods : ReflectionUtils.removeOverloads(methods);
     }
 }

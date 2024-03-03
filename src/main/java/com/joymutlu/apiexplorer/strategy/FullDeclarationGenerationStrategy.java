@@ -6,7 +6,6 @@ import com.joymutlu.apiexplorer.util.StringUtils;
 import java.lang.reflect.Method;
 
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
 
 public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy {
     @Override
@@ -24,7 +23,7 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
                 .append(StringUtils.getArgDefaultValuesString(
                         stream(method.getParameterTypes())
                                 .map(Class::getName)
-                                .collect(toList())))
+                                .toList()))
                 .append(");")
                 .append("\n")
                 .append(ctx.getIndent());

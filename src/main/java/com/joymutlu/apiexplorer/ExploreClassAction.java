@@ -1,12 +1,11 @@
 package com.joymutlu.apiexplorer;
+
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
 import com.joymutlu.apiexplorer.exception.*;
 import com.joymutlu.apiexplorer.model.ExploreConfig;
 import com.joymutlu.apiexplorer.model.ExploreContext;
@@ -14,7 +13,6 @@ import com.joymutlu.apiexplorer.model.UserInput;
 import com.joymutlu.apiexplorer.service.ClassSearchService;
 import com.joymutlu.apiexplorer.service.CodeGenerationService;
 import com.joymutlu.apiexplorer.util.ImportUtils;
-import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.util.List;
 
@@ -22,7 +20,6 @@ import static com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR;
 import static com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT;
 import static com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction;
 import static com.intellij.openapi.ui.Messages.*;
-import static java.lang.String.format;
 
 public class ExploreClassAction extends AnAction {
     private final CodeGenerationService codeGenerationService = new CodeGenerationService();
@@ -30,8 +27,10 @@ public class ExploreClassAction extends AnAction {
     private ExploreContext exploreCtx;
     private Project project;
     private Document document;
-    private CharSequence editorText;
+    private String editorText;
     private int caret;
+    private String line;
+    private int lineOffset;
 
     @Override
     public void actionPerformed(AnActionEvent e) {
@@ -43,6 +42,11 @@ public class ExploreClassAction extends AnAction {
         document = editor.getDocument();
         editorText = document.getText();
         caret = editor.getCaretModel().getOffset();
+        final int lineNumber = document.getLineNumber(caret);
+        final int lineStartOffset = document.getLineStartOffset(lineNumber);
+        final int lineEndOffset = document.getLineEndOffset(lineNumber);
+        line = document.getText(new TextRange(lineStartOffset, lineEndOffset));
+        lineOffset = caret - lineStartOffset;
 
         runWriteCommandAction(project, generateAPI());
     }
@@ -59,15 +63,9 @@ public class ExploreClassAction extends AnAction {
     private Runnable generateAPI() {
         return () -> {
             try {
-                System.out.println("Capturing line...");
-                final int lineNumber = document.getLineNumber(caret);
-                final int lineStartOffset = document.getLineStartOffset(lineNumber);
-                final int lineEndOffset = document.getLineEndOffset(lineNumber);
-                final String line = document.getText(new TextRange(lineStartOffset, lineEndOffset));
-                System.out.printf("Captured line %d: [%s]%n", lineNumber, line);
-
-                exploreCtx.setUserInput(defineUserInput(line, caret - lineStartOffset));
-                exploreCtx.setIndent(StringUtils.calcSpaces(line, caret));
+                final UserInput userInput = defineUserInput(line, lineOffset);
+                exploreCtx.setUserInput(userInput);
+                exploreCtx.setIndent(lineOffset - userInput.getCaretOffset());
                 System.out.printf("User input [%s] was defined as [%s] with indent size=[%d]%n",
                         exploreCtx.getUserInput(), exploreCtx.getInputType().name(), exploreCtx.getIndent().length());
 
@@ -90,56 +88,34 @@ public class ExploreClassAction extends AnAction {
         };
     }
 
-    private UserInput defineUserInput(String line, int lineCaretPosition) {
+    private UserInput defineUserInput(String line, int startIdx) {
         System.out.println("Defining user input...");
-        String input = "";
-        int startPosition = caret;
-        int endPosition = caret;
-        int leftStep = 0;
-        int rightStep = 0;
-        for (int i = lineCaretPosition - 1; i >= 0; i--) {
-            final char c = line.charAt(i);
-            if (c == ' ') {
-                break;
-            }
-            if (c != '.') {
-                input = c + input;
-            }
-            leftStep++;
+        int leftIdx = startIdx - 1;
+        int rightIdx = startIdx;
+        while (leftIdx >= 0 && line.charAt(leftIdx) != ' ') {
+            leftIdx--;
         }
-        for (int i = lineCaretPosition; i < line.length(); i++) {
-            final char c = line.charAt(i);
-            if (c == ' ') {
-                break;
-            }
-            if (c != '.') {
-                input = input + c;
-            }
-            rightStep++;
+        leftIdx++;
+        while (rightIdx < line.length() && line.charAt(rightIdx) != ' ') {
+            rightIdx++;
         }
-        startPosition -= leftStep;
-        endPosition += rightStep;
-//        final PsiFile psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
-//        String userInput = "";
-//        if (psiFile != null) {
-//            userInput = findUserInput(psiFile, caret - 1).getText();
-//        }
-        return new UserInput(input, startPosition, endPosition);
-    }
-
-    private PsiElement findUserInput(PsiFile psiFile, int caret) {
-        PsiElement elementAtCaret = psiFile.findElementAt(caret);
-        if (elementAtCaret == null) {
-            elementAtCaret = findUserInput(psiFile, caret - 1);
+        int leftStep = startIdx - leftIdx;
+        int rightStep = rightIdx - startIdx;
+        if (line.charAt(rightIdx - 1) == '.') {
+            rightIdx--;
         }
-        return elementAtCaret;
+        return new UserInput(
+                line.substring(leftIdx, rightIdx),
+                caret - leftStep,
+                caret + rightStep,
+                leftStep);
     }
 
     private void updateEditor(String generatedCode, ExploreContext ctx) {
         if (!generatedCode.isBlank()) {
             document.replaceString(
-                    ctx.getUserInput().startPosition(),
-                    ctx.getUserInput().endPosition(),
+                    ctx.getUserInput().getStartPosition(),
+                    ctx.getUserInput().getEndPosition(),
                     generatedCode);
         }
     }

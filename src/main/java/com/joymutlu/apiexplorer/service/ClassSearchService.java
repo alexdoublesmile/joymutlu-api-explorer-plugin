@@ -13,20 +13,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.joymutlu.apiexplorer.util.ImportUtils.getFullClassName;
+import static com.joymutlu.apiexplorer.util.ImportUtils.getPathList;
 import static com.joymutlu.apiexplorer.util.StringUtils.*;
 
 public final class ClassSearchService {
     public Class<?> findClass(List<String> importList, String className) throws NoClassException, NoImportException {
-        final Optional<Class<?>> maybeClass = ClassUtils.findClassByName(
-                ImportUtils.getFullClassName(importList, className));
+        final Optional<Class<?>> maybeClass = ClassUtils.findClassByName(getFullClassName(importList, className));
 
         return maybeClass.isPresent()
                 ? maybeClass.get()
-                : ClassUtils.findClassByNameList(ImportUtils.getAsteriskDeclarations(importList), className)
+                : ClassUtils.findClassByNameList(getPathList(importList), className)
                 .orElseThrow(() -> new NoImportException("Import for '" + className + "' class not found. Declare import first"));
     }
 
-    public String findClassName(ExploreContext ctx, CharSequence code) throws UnknownInputException, NoInitializingLineException {
+    public String findClassName(ExploreContext ctx, String code) throws UnknownInputException, NoInitializingLineException {
         switch (ctx.getInputType()) {
             case TYPE: return ctx.getUserInput().value();
             case OBJECT: return defineClassFromObject(ctx, code);
@@ -34,17 +35,17 @@ public final class ClassSearchService {
         }
     }
 
-    private String defineClassFromObject(ExploreContext ctx, CharSequence editorCode) throws NoInitializingLineException {
+    private String defineClassFromObject(ExploreContext ctx, String editorCode) throws NoInitializingLineException {
         final String input = ctx.getUserInput().value();
         System.out.printf("Defining object [%s] type...%n", input);
-        String line = StringUtils.findInitializingLine(editorCode, input)
+        String initLine = StringUtils.findInitializingLine(editorCode, input)
                 .orElseThrow(NoInitializingLineException::new);
-        System.out.printf("Initialization line: [%s]%n", line);
+        System.out.printf("Initialization line: [%s]%n", initLine);
 
-        final String[] lineElements = line.trim().split("[ ;=(),]");
-        System.out.printf("Elements: [%s]%n", Arrays.toString(lineElements));
+        final String[] initLineElements = initLine.trim().split("[ ;=(),]");
+        System.out.printf("Elements: [%s]%n", Arrays.toString(initLineElements));
 
-        String objectType = resolveType(lineElements, input);
+        String objectType = resolveType(initLineElements, input);
         System.out.printf("Object type defined as [%s]%n", objectType);
         return objectType;
     }
@@ -58,9 +59,9 @@ public final class ClassSearchService {
                     typeDeclaration = resolveLowerCaseType(elements, i, typeDeclaration);
                 }
                 if (isGenericDeclaration(typeDeclaration)) {
-                    typeDeclaration = filterGeneric(resolveTypeFromGeneric(elements, i - 1));
+                    typeDeclaration = StringUtils.stripGenerics(resolveTypeFromGeneric(elements, i - 1));
                 }
-                return isArray(typeDeclaration) ? "Array" : filterGeneric(typeDeclaration);
+                return isArray(typeDeclaration) ? "Array" : StringUtils.stripGenerics(typeDeclaration);
             }
             if (element.contains(referenceName) && isDirtyVarargOrArray(element, referenceName)) {
                 return "Array";
@@ -100,7 +101,7 @@ public final class ClassSearchService {
         if (!typeDeclaration.isBlank() && isArray(typeDeclaration)) {
             return "Array";
         }
-        if (typeDeclaration.isBlank() || isUndefined(typeDeclaration)) {
+        if (typeDeclaration.isBlank() || isUndefinedLowerType(typeDeclaration)) {
             for (int i = idx; i >= 0; i--) {
                 final String element = elements[i];
                 System.out.printf("Scanning for lowercase type [%s]", element);

@@ -18,15 +18,13 @@ public final class CodeGenerationService {
     }
 
     public String generateApiString(ExploreContext ctx) throws NoApiException {
-        if (ctx.getApi().size() == 0) {
+        if (ctx.getApi().isEmpty()) {
             throw new NoApiException(format("No %sAPI for %s", ctx.getInputType() == InputType.TYPE ? "static " : "", ctx.getExploreClass()));
         }
-        System.out.printf("Generating %d methods for %s with %d spaces each%n", ctx.getApi().size(), ctx.getUserInput(), ctx.getIndent().length());
-
-        StringBuilder sb = new StringBuilder();
-        ctx.getApi().forEach(method -> sb.append(
-                strategyMap.get(ctx.getApiViewType())
-                        .generateApiLine(ctx, method)));
-        return sb.toString();
+        return ctx.getApi().stream()
+                .map(method -> strategyMap.get(ctx.getApiViewType()).generateApiLine(ctx, method))
+                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+                .toString();
     }
+
 }

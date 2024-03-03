@@ -1,11 +1,11 @@
 package com.joymutlu.apiexplorer.util;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Scanner;
 
 import static com.joymutlu.apiexplorer.util.ClassUtils.PRIMITIVE_SET;
-import static java.util.Optional.empty;
+import static java.lang.Character.isLetter;
 
 public final class StringUtils {
     public static String getArgDefaultValuesString(List<String> argTypes) {
@@ -18,63 +18,49 @@ public final class StringUtils {
             }
         }
         return result;
+//        return String.join(", ", argTypes.stream().map(StringUtils::getArgDefaultValue));
     }
 
     private static String getArgDefaultValue(String paramType) {
         switch (paramType) {
             case "Byte" :
+            case "byte" :
             case "Short" :
-            case "Integer" : return "1";
-            case "Long" : return "1L";
-            case "Float" : return "1.0f";
-            case "Double" : return "1.0";
-            case "Boolean" : return "true";
-            case "Character" : return "'c'";
+            case "short" :
+            case "Integer" :
+            case "int" : return "1";
+            case "Long" :
+            case "long" : return "1L";
+            case "Float" :
+            case "float" : return "1.0f";
+            case "Double" :
+            case "double" : return "1.0";
+            case "Boolean" :
+            case "boolean" : return "true";
+            case "Character" :
+            case "char" : return "'c'";
             case "String" : return "str";
             default: return "new Object()";
         }
     }
 
-    public static int calcSpaces(String line, int offset) {
-        System.out.println("Defining indent...");
-
-        int indentCount = 0;
-        for (int i = 0; i < offset && i < line.length(); i++) {
-            if (line.charAt(i) == ' ') {
-                indentCount++;
-            }
-        }
-        System.out.printf("Defined indent by %s spaces%n", indentCount);
-        return indentCount;
+    public static Optional<String> findInitializingLine(String editorCode, String objectName) {
+        return Arrays.stream(editorCode.split("\n"))
+                .filter(line -> line.contains(objectName))
+                .findFirst();
     }
 
-    public static Optional<String> findInitializingLine(CharSequence editorCode, String objectName) {
-        Scanner scanner = new Scanner(editorCode.toString());
-        String line = "";
-        while (scanner.hasNextLine()) {
-            line = scanner.nextLine();
-            if (line.contains(objectName) ) {
-                return Optional.of(line);
-            }
-        }
-        return empty();
-    }
-
-    public static String filterGeneric(String str) {
-        for (int i = 0; i < str.length(); i++) {
-            final char ch = str.charAt(i);
-            if (ch == '<') {
-                return str.substring(0, i);
-            }
-        }
-        return str;
+    public static String stripGenerics(String str) {
+        return str.indexOf('<') != -1
+                ? str.substring(0, str.indexOf('<'))
+                : str;
     }
 
     public static boolean isGenericDeclaration(String str) {
         return str.endsWith(">");
     }
 
-    public static boolean isUndefined(String str) {
+    public static boolean isUndefinedLowerType(String str) {
         return isNotPrimitive(str) && !str.equals("var");
     }
 
@@ -90,12 +76,16 @@ public final class StringUtils {
         return Character.isUpperCase(str.charAt(0));
     }
 
-    public static boolean isDirtyVarargOrArray(String referenceElement, String referenceName) {
-        return referenceElement.contains("..." + referenceName)
-                || referenceElement.contains(referenceName + "[");
+    public static boolean isDirtyVarargOrArray(String referenceStr, String reference) {
+        return referenceStr.contains("..." + reference)
+                || referenceStr.contains(reference + "[");
     }
 
     public static boolean isArray(String str) {
         return str.charAt(str.length() - 1) == ']';
+    }
+
+    public static boolean isUnknown(String str) {
+        return str.isBlank() || !isLetter(str.charAt(0));
     }
 }

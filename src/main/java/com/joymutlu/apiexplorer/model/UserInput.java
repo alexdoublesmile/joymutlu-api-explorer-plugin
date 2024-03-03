@@ -4,23 +4,29 @@ public class UserInput {
     private final String input;
     private final int startPosition;
     private final int endPosition;
+    private final int caretOffset;
 
-    public UserInput(String input, int startPosition, int endPosition) {
+    public UserInput(String input, int startPosition, int endPosition, int caretOffset) {
         this.input = input;
         this.startPosition = startPosition;
         this.endPosition = endPosition;
+        this.caretOffset = caretOffset;
     }
 
     public String value() {
         return input;
     }
 
-    public int startPosition() {
+    public int getStartPosition() {
         return startPosition;
     }
 
-    public int endPosition() {
+    public int getEndPosition() {
         return endPosition;
+    }
+
+    public int getCaretOffset() {
+        return caretOffset;
     }
 
     @Override

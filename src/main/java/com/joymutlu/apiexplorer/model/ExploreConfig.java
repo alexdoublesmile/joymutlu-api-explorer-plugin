@@ -7,6 +7,7 @@ public class ExploreConfig {
     private final boolean withReturnValues;
     private final boolean withParentApi;
     private final boolean withObjectMethods;
+    private final boolean withNaturalSorting;
     private final ApiViewType apiViewType;
 
     public ExploreConfig(
@@ -14,7 +15,8 @@ public class ExploreConfig {
             boolean withArguments,
             boolean withReturnValues,
             boolean withParentApi,
-            boolean withObjectMethods
+            boolean withObjectMethods,
+            boolean withNaturalSorting
     ) {
         this.withDeprecated = withDeprecated;
         this.withArguments = withArguments;
@@ -24,6 +26,7 @@ public class ExploreConfig {
         apiViewType = withArguments
                 ? this.withReturnValues ? ApiViewType.FULL : ApiViewType.METHOD_CALL
                 : ApiViewType.METHOD_NAME;
+        this.withNaturalSorting = withNaturalSorting;
     }
 
     public boolean withDeprecated() {
@@ -46,6 +49,10 @@ public class ExploreConfig {
         return withObjectMethods;
     }
 
+    public boolean withNaturalSorting() {
+        return withNaturalSorting;
+    }
+
     public ApiViewType getApiViewType() {
         return apiViewType;
     }
@@ -60,9 +67,15 @@ public class ExploreConfig {
         private boolean withReturnValues;
         private boolean withParentApi;
         private boolean withObjectMethods;
+        private boolean withNaturalSorting;
 
         private ConfigBuilder() {
 
+        }
+
+        public ConfigBuilder withNaturalSorting(boolean withNaturalSorting) {
+            this.withNaturalSorting = withNaturalSorting;
+            return this;
         }
 
         public ConfigBuilder withDeprecated(boolean withDeprecated) {
@@ -88,7 +101,8 @@ public class ExploreConfig {
                     withArguments,
                     withReturnValues,
                     withParentApi,
-                    withObjectMethods
+                    withObjectMethods,
+                    withNaturalSorting
             );
         }
     }

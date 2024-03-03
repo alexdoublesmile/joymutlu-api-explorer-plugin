@@ -40,6 +40,7 @@ public class ExploreClassAction extends AnAction {
                 .withDeprecated(true)
                 .withArgumentsAndReturns(false, false)
                 .withParentApi(true, false)
+                .withNaturalSorting(false)
                 .build());
     }
 
@@ -82,12 +83,6 @@ public class ExploreClassAction extends AnAction {
 }
 
 
-
-// TODO: 27.02.2024 Generate checkers(return boolean)
-// TODO: 27.02.2024 Generate getters(startsWith "get..")
-// TODO: 27.02.2024 Generate setters(startsWith "set..")
-// TODO: 29.02.2024 add different sorting strategies for methods
-// TODO: 27.02.2024 Provide options for method filtering
 // TODO: 27.02.2024 Provide options for customizing default parameters
 // TODO: 01.03.2024 Fix errors
 

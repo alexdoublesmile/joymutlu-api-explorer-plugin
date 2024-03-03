@@ -15,7 +15,7 @@ public class MethodCallGenerationStrategy implements CodeGenerationStrategy {
                 .append(".")
                 .append(method.getName())
                 .append("(")
-                .append(StringUtils.getArgDefaultValuesString(
+                .append(StringUtils.getArgsString(
                         stream(method.getParameterTypes())
                         .map(Class::getName)
                         .toList()))

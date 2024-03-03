@@ -4,7 +4,6 @@ import com.joymutlu.apiexplorer.model.ExploreContext;
 import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import static java.util.Arrays.stream;
 
@@ -17,7 +16,7 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
                 .append(".")
                 .append(method.getName())
                 .append("(")
-                .append(StringUtils.getArgDefaultValuesString(
+                .append(StringUtils.getArgsString(
                         stream(method.getParameterTypes())
                                 .map(Class::getName)
                                 .toList()))

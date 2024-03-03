@@ -6,11 +6,9 @@ import com.joymutlu.apiexplorer.model.ExploreContext;
 import com.joymutlu.apiexplorer.model.InputType;
 import com.joymutlu.apiexplorer.strategy.CodeGenerationStrategy;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static java.util.Comparator.comparing;
 
 public final class CodeGenerationService {
     private final Map<ApiViewType, CodeGenerationStrategy> strategyMap;
@@ -27,7 +25,7 @@ public final class CodeGenerationService {
         return ctx.getApi().values()
                 .stream()
                 .filter(method -> method.getName().startsWith(ctx.getUserInput().getFilter()))
-                .sorted(comparing(Method::getName))
+                .sorted(ctx.getSorting())
                 .map(method -> strategyMap.get(ctx.getApiViewType())
                         .generateApiLine(ctx, method))
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)

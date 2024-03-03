@@ -8,7 +8,7 @@ import static com.joymutlu.apiexplorer.util.ClassUtils.PRIMITIVE_SET;
 import static java.lang.Character.isLetter;
 
 public final class StringUtils {
-    public static String getArgDefaultValuesString(List<String> argTypes) {
+    public static String getArgsString(List<String> argTypes) {
         String result = "";
         for (int i = 0; i < argTypes.size(); i++) {
             final String paramType = argTypes.get(i);
@@ -18,7 +18,6 @@ public final class StringUtils {
             }
         }
         return result;
-//        return String.join(", ", argTypes.stream().map(StringUtils::getArgDefaultValue));
     }
 
     private static String getArgDefaultValue(String paramType) {
@@ -47,8 +46,18 @@ public final class StringUtils {
 
     public static Optional<String> findInitializingLine(String editorCode, String objectName) {
         return Arrays.stream(editorCode.split("\n"))
-                .filter(line -> line.contains(objectName))
+                .filter(line -> isInitLine(line, objectName))
                 .findFirst();
+    }
+
+    private static boolean isInitLine(String line, String objectName) {
+        return line.contains(" " + objectName + " ")
+                || line.contains(" " + objectName + ";")
+                || line.contains(" " + objectName + "=")
+                || line.contains(" " + objectName + ",")
+                || line.contains("..." + objectName + ")")
+                || line.contains("..." + objectName + " ")
+                || line.contains(" " + objectName + ")");
     }
 
     public static String stripGenerics(String str) {

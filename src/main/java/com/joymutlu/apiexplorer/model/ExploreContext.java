@@ -5,13 +5,11 @@ import com.joymutlu.apiexplorer.util.ReflectionUtils;
 import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.lang.Character.isLowerCase;
 import static java.lang.String.format;
+import static java.util.Comparator.comparing;
 
 public class ExploreContext {
     private final ExploreConfig config;
@@ -85,5 +83,20 @@ public class ExploreContext {
 
     private Map<MethodDeclaration, Method> filterUnique(Map<MethodDeclaration, Method> methods) {
         return config.withArguments() ? methods : ReflectionUtils.removeOverloads(methods);
+    }
+
+    public Comparator<? super Method> getSorting() {
+        return config.withNaturalSorting()
+                ? comparing(Method::getName)
+                : comparing((Method method) -> {
+                    String name = method.getName();
+                    return name.startsWith("is") ? 1
+                            : name.startsWith("has") ? 2
+                            : name.startsWith("get") ? 3
+                            : name.startsWith("set") ? 4
+                            : name.startsWith("to") ? 5
+                            : !name.startsWith("compare") ? 6
+                            : 7;
+                }).thenComparing(Method::getName);
     }
 }

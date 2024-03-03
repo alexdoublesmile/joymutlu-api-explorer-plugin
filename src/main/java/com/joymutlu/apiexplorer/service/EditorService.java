@@ -3,6 +3,9 @@ package com.joymutlu.apiexplorer.service;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
+import com.joymutlu.apiexplorer.exception.NoInitializingLineException;
+import com.joymutlu.apiexplorer.exception.UnknownInputException;
+import com.joymutlu.apiexplorer.model.ExploreContext;
 import com.joymutlu.apiexplorer.model.UserInput;
 import com.joymutlu.apiexplorer.util.EditorConstants;
 
@@ -18,6 +21,7 @@ public final class EditorService {
     private final String line;
     private final int lineOffset;
     private final List<String> importList;
+    private final ClassSearchService classSearchService;
 
     public EditorService(Editor editor) {
         this.editor = editor;
@@ -32,6 +36,7 @@ public final class EditorService {
         importList = Arrays.stream(editorText.split("\n"))
                 .filter(line -> line.startsWith(EditorConstants.IMPORT_STRING_PREFIX))
                 .toList();
+        classSearchService = new ClassSearchService(editorText);
     }
 
     public UserInput defineUserInput() {
@@ -47,14 +52,18 @@ public final class EditorService {
         }
         int leftStep = lineOffset - leftIdx;
         int rightStep = rightIdx - lineOffset;
-        if (line.charAt(rightIdx - 1) == '.') {
-            rightIdx--;
+        final String[] fullInput = line.substring(leftIdx, rightIdx).split("\\.");
+
+        String filter = fullInput.length == 2 ? fullInput[1] : "";
+        return new UserInput(fullInput[0], filter, caret - leftStep, caret + rightStep, leftStep);
+    }
+
+    public String defineClassName(ExploreContext ctx) throws UnknownInputException, NoInitializingLineException {
+        switch (ctx.getInputType()) {
+            case TYPE: return ctx.getUserInput().value();
+            case OBJECT: return classSearchService.defineClassFromObject(ctx);
+            default: throw new UnknownInputException();
         }
-        return new UserInput(
-                line.substring(leftIdx, rightIdx),
-                caret - leftStep,
-                caret + rightStep,
-                leftStep);
     }
 
     public int getLineOffset() {

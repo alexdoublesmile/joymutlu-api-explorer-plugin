@@ -26,6 +26,7 @@ public final class CodeGenerationService {
         }
         return ctx.getApi().values()
                 .stream()
+                .filter(method -> method.getName().startsWith(ctx.getUserInput().getFilter()))
                 .sorted(comparing(Method::getName))
                 .map(method -> strategyMap.get(ctx.getApiViewType())
                         .generateApiLine(ctx, method))

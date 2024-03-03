@@ -6,7 +6,7 @@ import com.intellij.openapi.project.Project;
 import com.joymutlu.apiexplorer.exception.*;
 import com.joymutlu.apiexplorer.model.ExploreConfig;
 import com.joymutlu.apiexplorer.model.ExploreContext;
-import com.joymutlu.apiexplorer.service.ClassSearchService;
+import com.joymutlu.apiexplorer.service.ClassLoadService;
 import com.joymutlu.apiexplorer.service.CodeGenerationService;
 import com.joymutlu.apiexplorer.service.EditorService;
 
@@ -19,10 +19,10 @@ import static com.intellij.openapi.ui.Messages.*;
 
 public class ExploreClassAction extends AnAction {
     private final CodeGenerationService codeGenerationService = new CodeGenerationService();
-    private final ClassSearchService classSearchService = new ClassSearchService();
+    private final ClassLoadService classLoadService = new ClassLoadService();
+    private EditorService editorService;
     private ExploreContext exploreCtx;
     private Project project;
-    private EditorService editorService;
 
     @Override
     public void actionPerformed(AnActionEvent e) {
@@ -38,7 +38,7 @@ public class ExploreClassAction extends AnAction {
     private ExploreContext buildExploreContext(AnActionEvent e) {
         return new ExploreContext(ExploreConfig.builder()
                 .withDeprecated(true)
-                .withArgumentsAndReturns(true, true)
+                .withArgumentsAndReturns(false, false)
                 .withParentApi(true, false)
                 .build());
     }
@@ -54,11 +54,11 @@ public class ExploreClassAction extends AnAction {
                 System.out.println("Scanning imports...");
                 final List<String> importList = editorService.getImportList();
                 System.out.printf("Imports: %s%n", importList);
-                final String className = classSearchService.findClassName(exploreCtx, editorService.getEditorText());
+                final String className = editorService.defineClassName(exploreCtx);
                 System.out.printf("Necessary Class name: [%s]%n", className);
 
-                final Class<?> exploreClass = classSearchService.findClass(importList, className);
-                System.out.printf("Defined Class: [%s]%n", exploreClass);
+                final Class<?> exploreClass = classLoadService.loadClass(importList, className);
+                System.out.printf("Loaded Class: [%s]%n", exploreClass);
                 exploreCtx.setApi(exploreClass);
                 final String generatedStr = codeGenerationService.generateApiString(exploreCtx);
                 updateEditor(generatedStr, exploreCtx);

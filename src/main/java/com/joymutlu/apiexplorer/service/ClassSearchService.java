@@ -1,44 +1,24 @@
 package com.joymutlu.apiexplorer.service;
 
-import com.joymutlu.apiexplorer.exception.NoClassException;
-import com.joymutlu.apiexplorer.exception.NoImportException;
 import com.joymutlu.apiexplorer.exception.NoInitializingLineException;
-import com.joymutlu.apiexplorer.exception.UnknownInputException;
 import com.joymutlu.apiexplorer.model.ExploreContext;
-import com.joymutlu.apiexplorer.util.ClassUtils;
-import com.joymutlu.apiexplorer.util.ImportUtils;
 import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
-import static com.joymutlu.apiexplorer.util.ImportUtils.getFullClassName;
-import static com.joymutlu.apiexplorer.util.ImportUtils.getPathList;
 import static com.joymutlu.apiexplorer.util.StringUtils.*;
 
 public final class ClassSearchService {
-    public Class<?> findClass(List<String> importList, String className) throws NoClassException, NoImportException {
-        final Optional<Class<?>> maybeClass = ClassUtils.findClassByName(getFullClassName(importList, className));
+    private final String editorText;
 
-        return maybeClass.isPresent()
-                ? maybeClass.get()
-                : ClassUtils.findClassByNameList(getPathList(importList), className)
-                .orElseThrow(() -> new NoImportException("Import for '" + className + "' class not found. Declare import first"));
+    public ClassSearchService(String editorText) {
+        this.editorText = editorText;
     }
 
-    public String findClassName(ExploreContext ctx, String code) throws UnknownInputException, NoInitializingLineException {
-        switch (ctx.getInputType()) {
-            case TYPE: return ctx.getUserInput().value();
-            case OBJECT: return defineClassFromObject(ctx, code);
-            default: throw new UnknownInputException();
-        }
-    }
-
-    private String defineClassFromObject(ExploreContext ctx, String editorCode) throws NoInitializingLineException {
+    public String defineClassFromObject(ExploreContext ctx) throws NoInitializingLineException {
         final String input = ctx.getUserInput().value();
         System.out.printf("Defining object [%s] type...%n", input);
-        String initLine = StringUtils.findInitializingLine(editorCode, input)
+        String initLine = StringUtils.findInitializingLine(editorText, input)
                 .orElseThrow(NoInitializingLineException::new);
         System.out.printf("Initialization line: [%s]%n", initLine);
 
@@ -55,7 +35,7 @@ public final class ClassSearchService {
             String element = elements[i].trim();
             if (element.equals(referenceName)) {
                 String typeDeclaration = elements[i - 1].trim();
-                if (typeDeclaration.isBlank() || isLowerCase(typeDeclaration)) {
+                if (isInvalidDeclaration(typeDeclaration)) {
                     typeDeclaration = resolveLowerCaseType(elements, i, typeDeclaration);
                 }
                 if (isGenericDeclaration(typeDeclaration)) {
@@ -68,6 +48,10 @@ public final class ClassSearchService {
             }
         }
         throw new NoInitializingLineException();
+    }
+
+    private boolean isInvalidDeclaration(String typeDeclaration) {
+        return typeDeclaration.isBlank() || isLowerCase(typeDeclaration);
     }
 
     private String resolveTypeFromGeneric(String[] elements, int idx) throws NoInitializingLineException {

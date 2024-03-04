@@ -8,6 +8,11 @@ import java.lang.reflect.Method;
 import static java.util.Arrays.stream;
 
 public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy {
+    private static final String ARRAY_DEFAULT_TYPE = "[Ljava.lang.Object;";
+    private static final String ARRAY_CUSTOM_TYPE = "Object[]";
+    private static final String REFERENCE_SUFFIX_START = "By";
+    private static final String REFERENCE_SUFFIX_DELIMITER = "And";
+
     @Override
     public String generateApiLine(ExploreContext ctx, Method method) {
         return new StringBuilder()
@@ -34,14 +39,15 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
         return new StringBuilder()
                 .append(resolveReturnType(returnType))
                 .append(" ")
-                .append(method.getName() + resolveSuffix(method))
+                .append(method.getName())
+                .append(resolveSuffix(method))
                 .append(" = ")
                 .toString();
     }
 
     private String resolveReturnType(Class<?> returnType) {
-        return returnType.getName().equals("[Ljava.lang.Object;")
-                ? "Object[]"
+        return returnType.getName().equals(ARRAY_DEFAULT_TYPE)
+                ? ARRAY_CUSTOM_TYPE
                 : returnType.getSimpleName();
     }
 
@@ -49,10 +55,10 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
         if (method.getParameterTypes().length == 0) {
             return "";
         }
-        final String result = "By" + stream(method.getParameterTypes())
+        final String result = REFERENCE_SUFFIX_START + stream(method.getParameterTypes())
                 .map(Class::getSimpleName)
                 .map(suffix -> suffix.replace("[]", "Array"))
-                .collect(StringBuilder::new, (sb1, sb2) -> sb1.append(sb2).append("And"), StringBuilder::append);
-        return result.substring(0, result.length() - 3);
+                .collect(StringBuilder::new, (sb1, sb2) -> sb1.append(sb2).append(REFERENCE_SUFFIX_DELIMITER), StringBuilder::append);
+        return result.substring(0, result.length() - REFERENCE_SUFFIX_DELIMITER.length());
     }
 }

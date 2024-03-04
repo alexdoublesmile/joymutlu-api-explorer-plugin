@@ -1,7 +1,9 @@
 package com.joymutlu.apiexplorer;
 
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.actionSystem.EditorActionHandler;
+import com.intellij.openapi.editor.actionSystem.EditorActionManager;
 import com.intellij.openapi.project.Project;
 import com.joymutlu.apiexplorer.exception.*;
 import com.joymutlu.apiexplorer.model.ExploreConfig;
@@ -9,6 +11,7 @@ import com.joymutlu.apiexplorer.model.ExploreContext;
 import com.joymutlu.apiexplorer.service.ClassLoadService;
 import com.joymutlu.apiexplorer.service.CodeGenerationService;
 import com.joymutlu.apiexplorer.service.EditorService;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -21,35 +24,46 @@ public class ExploreClassAction extends AnAction {
     private final CodeGenerationService codeGenerationService = new CodeGenerationService();
     private final ClassLoadService classLoadService = new ClassLoadService();
     private EditorService editorService;
-    private ExploreContext exploreCtx;
-    private Project project;
+    private ExploreContext ctx;
+
+    @Override
+    public void update(final AnActionEvent e) {
+        final Project project = e.getProject();
+        final Editor editor = e.getData(CommonDataKeys.EDITOR);
+        e.getPresentation().setEnabledAndVisible(project != null && editor != null);
+    }
+
+    @Override
+    public @NotNull ActionUpdateThread getActionUpdateThread() {
+        return ActionUpdateThread.BGT;
+    }
 
     @Override
     public void actionPerformed(AnActionEvent e) {
         System.out.println("-------- API Exploring triggered --------");
-        exploreCtx = buildExploreContext(e);
+        ctx = buildExploreContext(e);
 
-        project = e.getRequiredData(PROJECT);
+        final Project project = e.getRequiredData(PROJECT);
         editorService = new EditorService(e.getRequiredData(EDITOR));
 
         try {
-            exploreCtx.setUserInput(editorService.defineUserInput());
-            exploreCtx.setIndent(editorService.getLineOffset() - exploreCtx.getUserInput().getCaretOffset());
+            ctx.setUserInput(editorService.defineUserInput());
+            ctx.setIndent(editorService.getLineOffset() - ctx.getUserInput().getCaretOffset());
             System.out.printf("User input [%s] was defined as [%s] with indent size=[%d]%n",
-                    exploreCtx.getUserInput(), exploreCtx.getInputType().name(), exploreCtx.getIndent().length());
+                    ctx.getUserInput(), ctx.getInputType().name(), ctx.getIndent().length());
 
             System.out.println("Scanning imports...");
             final List<String> importList = editorService.getImportList();
             System.out.printf("Imports: %s%n", importList);
-            final String className = editorService.defineClassName(exploreCtx);
+            final String className = editorService.defineClassName(ctx);
             System.out.printf("Necessary Class name: [%s]%n", className);
 
             final Class<?> exploreClass = classLoadService.loadClass(importList, className);
             System.out.printf("Loaded Class: [%s]%n", exploreClass);
-            exploreCtx.setApi(exploreClass);
-            final String generatedStr = codeGenerationService.generateApiString(exploreCtx);
+            ctx.setApi(exploreClass);
+            final String generatedStr = codeGenerationService.generateApiString(ctx);
 
-            runWriteCommandAction(project, () -> updateEditor(generatedStr, exploreCtx));
+            runWriteCommandAction(project, () -> updateEditor(generatedStr));
 
         } catch (UnknownInputException | NoImportException | NoClassException ex) {
             showMessageDialog(project, ex.getMessage(), "Error", getErrorIcon());
@@ -67,7 +81,7 @@ public class ExploreClassAction extends AnAction {
                 .build());
     }
 
-    private void updateEditor(String generatedCode, ExploreContext ctx) {
+    private void updateEditor(String generatedCode) {
         if (!generatedCode.isBlank()) {
             editorService.getDocument().replaceString(
                     ctx.getUserInput().getStartPosition(),
@@ -77,7 +91,7 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
-// TODO: 04.03.2024 Add filtration by containsSymbol
+// TODO: 04.03.2024 Add menu with configuration
 // TODO: 01.03.2024 Generate API for one of repeatable names in file
 // TODO: 01.03.2024 Generate API for static class
 // TODO: 01.03.2024 Generate API for static field

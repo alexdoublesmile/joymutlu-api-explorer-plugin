@@ -1,5 +1,6 @@
 package com.joymutlu.apiexplorer.service;
 
+import com.intellij.openapi.editor.Caret;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
@@ -16,7 +17,8 @@ public final class EditorService {
     private final Editor editor;
     private final Document document;
     private final String editorText;
-    private final int caret;
+    private final Caret primaryCaret;
+    private final int caretOffset;
     private final int lineNumber;
     private final String line;
     private final int lineOffset;
@@ -27,12 +29,13 @@ public final class EditorService {
         this.editor = editor;
         document = editor.getDocument();
         editorText = document.getText();
-        caret = editor.getCaretModel().getOffset();
-        lineNumber = document.getLineNumber(caret);
+        primaryCaret = editor.getCaretModel().getPrimaryCaret();
+        caretOffset = primaryCaret.getOffset();
+        lineNumber = document.getLineNumber(caretOffset);
         final int lineStartOffset = document.getLineStartOffset(lineNumber);
         final int lineEndOffset = document.getLineEndOffset(lineNumber);
         line = document.getText(new TextRange(lineStartOffset, lineEndOffset));
-        lineOffset = caret - lineStartOffset;
+        lineOffset = caretOffset - lineStartOffset;
         importList = Arrays.stream(editorText.split("\n"))
                 .filter(line -> line.startsWith(EditorConstants.IMPORT_STRING_PREFIX))
                 .toList();
@@ -55,7 +58,7 @@ public final class EditorService {
         final String[] fullInput = line.substring(leftIdx, rightIdx).split("\\.");
 
         String filter = fullInput.length == 2 ? fullInput[1] : "";
-        return new UserInput(fullInput[0], filter, caret - leftStep, caret + rightStep, leftStep);
+        return new UserInput(fullInput[0], filter, caretOffset - leftStep, caretOffset + rightStep, leftStep);
     }
 
     public String defineClassName(ExploreContext ctx) throws UnknownInputException, NoInitializingLineException {
@@ -82,8 +85,12 @@ public final class EditorService {
         return document;
     }
 
-    public int getCaret() {
-        return caret;
+    public Caret getPrimaryCaret() {
+        return primaryCaret;
+    }
+
+    public int getCaretOffset() {
+        return caretOffset;
     }
 
     public int getLineNumber() {

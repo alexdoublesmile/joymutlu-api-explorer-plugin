@@ -1,25 +1,35 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.joymutlu.api-explorer</id>
-    <name>Joymutlu-api-explorer</name>
-    <vendor email="alexdoublesmile@gmail.com" url="https://joy-it.link">joymutlu</vendor>
+    <name>Joymutlu API Explorer</name>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <description><![CDATA[
     Plugin for API exploring of any Java libraries and frameworks.
   ]]></description>
-    <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.java</depends>
+    <change-notes>
+        <![CDATA[
+      <ul>
+        <li><b>1.0</b> First Release 2024.3</li>
+      </ul>
+    ]]>
+    </change-notes>
+    <vendor email="alexdoublesmile@gmail.com" url="https://joy-it.link">joymutlu</vendor>
 
     <actions>
         <group id="Explorer" text="API" description="Explorer of API">
-            <add-to-group group-id="MainMenu" relative-to-action="HelpMenu" anchor="before"/>
-            <action class="com.joymutlu.apiexplorer.ExploreClassAction"
-                    id="ExploreClassAction">
+<!--            <add-to-group group-id="MainMenu" relative-to-action="HelpMenu" anchor="before"/>-->
+            <action class="com.joymutlu.apiexplorer.ExploreClassAction" id="ExploreClassAction">
                 <keyboard-shortcut first-keystroke="control alt E" keymap="$default"/>
             </action>
         </group>
     </actions>
 
+
     <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="API Explorer" secondary="true" icon="AllIcons.Toolwindows.WarningEvents" anchor="right"
+                    factoryClass="com.joymutlu.apiexplorer.demo.ApiExplorerToolWindowFactory"/>
     </extensions>
 </idea-plugin>

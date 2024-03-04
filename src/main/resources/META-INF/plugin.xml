@@ -11,7 +11,8 @@
     <depends>com.intellij.modules.java</depends>
 
     <actions>
-        <group id="Explore">
+        <group id="Explorer" text="API" description="Explorer of API">
+            <add-to-group group-id="MainMenu" relative-to-action="HelpMenu" anchor="before"/>
             <action class="com.joymutlu.apiexplorer.ExploreClassAction"
                     id="ExploreClassAction">
                 <keyboard-shortcut first-keystroke="control alt E" keymap="$default"/>

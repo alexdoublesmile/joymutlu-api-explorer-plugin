@@ -83,6 +83,7 @@ public class ExploreClassAction extends AnAction {
 }
 
 // TODO: 27.02.2024 Provide options for customizing default parameters
+// TODO: 04.03.2024 Add filtration by containsSymbol
 // TODO: 01.03.2024 Fix errors
 // TODO: 01.03.2024 Generate API for one of repeatable names in file
 // TODO: 01.03.2024 Generate API for static class

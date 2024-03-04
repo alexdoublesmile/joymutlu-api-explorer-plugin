@@ -7,12 +7,25 @@
     <depends>com.intellij.modules.java</depends>
 
     <description><![CDATA[
-    Plugin for API exploring of any Java libraries and frameworks.
+    Explore source code and APIs for any Java library or framework.<br/><br/>
+    Generate methods:<br/>
+    - by class name: Type a class name and press the hotkey (default: Ctrl + Alt + E) on each letter. This generates all static methods of the class for exploration, calling, debugging, etc.<br/>
+    - by object name: Type an object name and press the hotkey to generate all virtual methods of the object.<br/>
+    - by method pattern: Type a class/object name followed by a dot ("."), then type part of the desired API method (e.g., "someStr.is"). Press the hotkey to generate all methods that start with that pattern.<br/>
   ]]></description>
     <change-notes>
         <![CDATA[
       <ul>
-        <li><b>1.0</b> First Release 2024.3</li>
+        <li><b>1.0</b><br/>
+        First release (March 2024)<br/>
+        - Default trigger Ctrl + Alt + E<br/>
+        - Choose whether to generate methods with or without arguments.<br/>
+        - Include methods inherited from parent classes.<br/>
+        - Include deprecated methods (useful for exploration).<br/>
+        - Exclude methods from the top-level Object class.<br/>
+        - Sort methods by name and group them (checkers, getters, setters, etc.).<br/>
+        - Filter methods by the input pattern.<br/>
+        </li>
       </ul>
     ]]>
     </change-notes>

@@ -43,6 +43,7 @@ public class ExploreClassAction extends AnAction {
         System.out.println("-------- API Exploring triggered --------");
         ctx = buildExploreContext(e);
 
+
         final Project project = e.getRequiredData(PROJECT);
         editorService = new EditorService(e.getRequiredData(EDITOR));
 

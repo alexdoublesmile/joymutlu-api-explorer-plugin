@@ -82,11 +82,11 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
-
 // TODO: 27.02.2024 Provide options for customizing default parameters
 // TODO: 01.03.2024 Fix errors
-
-// TODO: 01.03.2024 Generate API after method call
-// TODO: 01.03.2024 Generate API after static/non-static direct field call
-// TODO: 27.02.2024 Generate all method tree(depth) with default params
-// TODO: 27.02.2024 Test the plugin thoroughly in different scenarios
+// TODO: 01.03.2024 Generate API for one of repeatable names in file
+// TODO: 01.03.2024 Generate API for static class
+// TODO: 01.03.2024 Generate API for static field
+// TODO: 01.03.2024 Generate API for method call
+// TODO: 27.02.2024 Generate API tree(for any depth)
+// TODO: 01.03.2024 Generate API in lambda

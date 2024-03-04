@@ -32,7 +32,30 @@ public class ExploreClassAction extends AnAction {
         project = e.getRequiredData(PROJECT);
         editorService = new EditorService(e.getRequiredData(EDITOR));
 
-        runWriteCommandAction(project, generateAPI());
+        try {
+            exploreCtx.setUserInput(editorService.defineUserInput());
+            exploreCtx.setIndent(editorService.getLineOffset() - exploreCtx.getUserInput().getCaretOffset());
+            System.out.printf("User input [%s] was defined as [%s] with indent size=[%d]%n",
+                    exploreCtx.getUserInput(), exploreCtx.getInputType().name(), exploreCtx.getIndent().length());
+
+            System.out.println("Scanning imports...");
+            final List<String> importList = editorService.getImportList();
+            System.out.printf("Imports: %s%n", importList);
+            final String className = editorService.defineClassName(exploreCtx);
+            System.out.printf("Necessary Class name: [%s]%n", className);
+
+            final Class<?> exploreClass = classLoadService.loadClass(importList, className);
+            System.out.printf("Loaded Class: [%s]%n", exploreClass);
+            exploreCtx.setApi(exploreClass);
+            final String generatedStr = codeGenerationService.generateApiString(exploreCtx);
+
+            runWriteCommandAction(project, () -> updateEditor(generatedStr, exploreCtx));
+
+        } catch (UnknownInputException | NoImportException | NoClassException ex) {
+            showMessageDialog(project, ex.getMessage(), "Error", getErrorIcon());
+        } catch (NoInitializingLineException | NoApiException ex) {
+            showMessageDialog(project, ex.getMessage(), "Info", getInformationIcon());
+        }
     }
 
     private ExploreContext buildExploreContext(AnActionEvent e) {
@@ -42,34 +65,6 @@ public class ExploreClassAction extends AnAction {
                 .withParentApi(true, false)
                 .withNaturalSorting(false)
                 .build());
-    }
-
-    private Runnable generateAPI() {
-        return () -> {
-            try {
-                exploreCtx.setUserInput(editorService.defineUserInput());
-                exploreCtx.setIndent(editorService.getLineOffset() - exploreCtx.getUserInput().getCaretOffset());
-                System.out.printf("User input [%s] was defined as [%s] with indent size=[%d]%n",
-                        exploreCtx.getUserInput(), exploreCtx.getInputType().name(), exploreCtx.getIndent().length());
-
-                System.out.println("Scanning imports...");
-                final List<String> importList = editorService.getImportList();
-                System.out.printf("Imports: %s%n", importList);
-                final String className = editorService.defineClassName(exploreCtx);
-                System.out.printf("Necessary Class name: [%s]%n", className);
-
-                final Class<?> exploreClass = classLoadService.loadClass(importList, className);
-                System.out.printf("Loaded Class: [%s]%n", exploreClass);
-                exploreCtx.setApi(exploreClass);
-                final String generatedStr = codeGenerationService.generateApiString(exploreCtx);
-                updateEditor(generatedStr, exploreCtx);
-
-            } catch (UnknownInputException | NoImportException | NoClassException e) {
-                showMessageDialog(project, e.getMessage(), "Error", getErrorIcon());
-            } catch (NoInitializingLineException | NoApiException e) {
-                showMessageDialog(project, e.getMessage(), "Info", getInformationIcon());
-            }
-        };
     }
 
     private void updateEditor(String generatedCode, ExploreContext ctx) {
@@ -82,9 +77,7 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
-// TODO: 27.02.2024 Provide options for customizing default parameters
 // TODO: 04.03.2024 Add filtration by containsSymbol
-// TODO: 01.03.2024 Fix errors
 // TODO: 01.03.2024 Generate API for one of repeatable names in file
 // TODO: 01.03.2024 Generate API for static class
 // TODO: 01.03.2024 Generate API for static field

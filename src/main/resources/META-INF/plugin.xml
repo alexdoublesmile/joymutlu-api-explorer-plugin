@@ -29,7 +29,5 @@
 
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="API Explorer" secondary="true" icon="AllIcons.Toolwindows.WarningEvents" anchor="right"
-                    factoryClass="com.joymutlu.apiexplorer.demo.ApiExplorerToolWindowFactory"/>
     </extensions>
 </idea-plugin>

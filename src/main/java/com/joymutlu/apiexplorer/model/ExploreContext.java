@@ -98,8 +98,10 @@ public class ExploreContext {
                             : name.startsWith("get") ? 3
                             : name.startsWith("set") ? 4
                             : name.startsWith("to") ? 5
-                            : !name.startsWith("compare") ? 6
-                            : 7;
+                            : !name.startsWith("compare")
+                            && !name.startsWith("close") ? 6
+                            : !name.startsWith("close") ? 7
+                            : 8;
                 }).thenComparing(PsiMethod::getName);
     }
 }

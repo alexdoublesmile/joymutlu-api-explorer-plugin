@@ -47,8 +47,9 @@ public final class PsiUtils {
     }
 
     public static Map<MethodDeclaration, PsiMethod> getStaticApi(PsiClass clazz) {
-        System.out.printf("Collecting all public static methods from %s...%n", clazz);
+        System.out.printf("Collecting all public static methods from %s...%n", clazz.getName());
         return stream(clazz.getMethods())
+                .filter(PsiUtils::isPublic)
                 .filter(PsiUtils::isStatic)
                 .filter(PsiUtils::isNotObjectMethod)
                 .collect(toMap(method ->
@@ -56,9 +57,14 @@ public final class PsiUtils {
                         identity()));
     }
 
+    private static boolean isPublic(PsiMethod method) {
+        return method.getModifierList().hasExplicitModifier(PsiModifier.PUBLIC) && !method.isConstructor();
+    }
+
     public static Map<MethodDeclaration, PsiMethod> getVirtualApi(PsiClass clazz, boolean withParentApi) {
-        System.out.printf("Collecting all public methods from %s...%n", clazz);
+        System.out.printf("Collecting all public methods from %s...%n", clazz.getName());
         final Map<MethodDeclaration, PsiMethod> result = stream(clazz.getMethods())
+                .filter(PsiUtils::isPublic)
                 .filter(PsiUtils::isVirtual)
                 .filter(PsiUtils::isNotObjectMethod)
                 .collect(toMap(method ->
@@ -95,5 +101,9 @@ public final class PsiUtils {
                 .collect(Collectors.toMap(method ->
                         new MethodDeclaration(method.getName(), method.getParameterList()),
                         identity()));
+    }
+
+    public static String getSimpleName(PsiClass clazz) {
+        return clazz.getName().split(":")[1];
     }
 }

@@ -19,7 +19,7 @@
         <li><b>1.0</b><br/>
         First release (March 2024)<br/>
         - Default trigger Ctrl + Alt + E<br/>
-        - Choose whether to generate methods with or without arguments.<br/>
+        - Generate only unique name methods without default arguments.<br/>
         - Include methods inherited from parent classes.<br/>
         - Include deprecated methods (useful for exploration).<br/>
         - Exclude methods from the top-level Object class.<br/>

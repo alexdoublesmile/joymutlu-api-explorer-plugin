@@ -2,9 +2,8 @@ package com.joymutlu.apiexplorer;
 
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.actionSystem.EditorActionHandler;
-import com.intellij.openapi.editor.actionSystem.EditorActionManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiClass;
 import com.joymutlu.apiexplorer.exception.*;
 import com.joymutlu.apiexplorer.model.ExploreConfig;
 import com.joymutlu.apiexplorer.model.ExploreContext;
@@ -22,7 +21,7 @@ import static com.intellij.openapi.ui.Messages.*;
 
 public class ExploreClassAction extends AnAction {
     private final CodeGenerationService codeGenerationService = new CodeGenerationService();
-    private final ClassLoadService classLoadService = new ClassLoadService();
+    private ClassLoadService classLoadService;
     private EditorService editorService;
     private ExploreContext ctx;
 
@@ -45,7 +44,9 @@ public class ExploreClassAction extends AnAction {
 
 
         final Project project = e.getRequiredData(PROJECT);
-        editorService = new EditorService(e.getRequiredData(EDITOR));
+        final Editor editor = e.getRequiredData(EDITOR);
+        editorService = new EditorService(editor);
+        classLoadService = new ClassLoadService(project);
 
         try {
             ctx.setUserInput(editorService.defineUserInput());
@@ -59,7 +60,7 @@ public class ExploreClassAction extends AnAction {
             final String className = editorService.defineClassName(ctx);
             System.out.printf("Necessary Class name: [%s]%n", className);
 
-            final Class<?> exploreClass = classLoadService.loadClass(importList, className);
+            final PsiClass exploreClass = classLoadService.loadClass(importList, className);
             System.out.printf("Loaded Class: [%s]%n", exploreClass);
             ctx.setApi(exploreClass);
             final String generatedStr = codeGenerationService.generateApiString(ctx);

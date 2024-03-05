@@ -1,6 +1,9 @@
 package com.joymutlu.apiexplorer.util;
 
+import java.util.HashSet;
 import java.util.Set;
+
+import static java.util.Arrays.asList;
 
 public final class ClassUtils {
     public static final Set<String> PRIMITIVE_SET = Set.of(
@@ -14,7 +17,16 @@ public final class ClassUtils {
             "boolean"
     );
 
-    public static boolean isNotTopClass(Class<?> parent) {
-        return parent != null && !parent.getName().equals("java.lang.Object");
-    }
+    public static final Set<String> OBJECT_METHODS = new HashSet<>(asList(
+            "equals",
+            "hashCode",
+            "getClass",
+            "finalize",
+            "wait",
+            "notify",
+            "notifyAll",
+            "toString",
+            "clone",
+            "Object"
+    ));
 }

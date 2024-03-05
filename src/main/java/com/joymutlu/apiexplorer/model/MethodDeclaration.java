@@ -1,6 +1,6 @@
 package com.joymutlu.apiexplorer.model;
 
-import java.util.List;
+import com.intellij.psi.PsiParameterList;
 
-public record MethodDeclaration(String name, List<Class<?>> argumentsList) {
+public record MethodDeclaration(String name, PsiParameterList argumentsList) {
 }

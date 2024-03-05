@@ -1,11 +1,14 @@
 package com.joymutlu.apiexplorer.model;
 
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiMethod;
 import com.joymutlu.apiexplorer.exception.UnknownInputException;
-import com.joymutlu.apiexplorer.util.ReflectionUtils;
+import com.joymutlu.apiexplorer.util.PsiUtils;
 import com.joymutlu.apiexplorer.util.StringUtils;
 
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.Character.isLowerCase;
 import static java.lang.String.format;
@@ -16,8 +19,8 @@ public class ExploreContext {
     private UserInput userInput;
     private InputType inputType;
     private String indent;
-    private Class<?> exploreClass;
-    private Map<MethodDeclaration, Method> api = new HashMap<>();
+    private PsiClass exploreClass;
+    private Map<MethodDeclaration, PsiMethod> api = new HashMap<>();
 
     public ExploreContext(ExploreConfig config) {
         this.config = config;
@@ -40,7 +43,7 @@ public class ExploreContext {
         indent = format("%-" + spacesNumber + "s", "");
     }
 
-    public Class<?> getExploreClass() {
+    public PsiClass getExploreClass() {
         return exploreClass;
     }
 
@@ -62,33 +65,33 @@ public class ExploreContext {
         return config;
     }
 
-    public Map<MethodDeclaration, Method> getApi() {
+    public Map<MethodDeclaration, PsiMethod> getApi() {
         return new HashMap<>(api);
     }
 
-    public void setApi(Class<?> clazz) throws UnknownInputException {
+    public void setApi(PsiClass clazz) throws UnknownInputException {
         exploreClass = clazz;
         api = switch (inputType) {
             case TYPE -> filterDeprecated(filterUnique(
-                    ReflectionUtils.getStaticApi(clazz)));
+                    PsiUtils.getStaticApi(clazz)));
             case OBJECT -> filterDeprecated(filterUnique(
-                    ReflectionUtils.getVirtualApi(clazz, config.withParentApi())));
+                    PsiUtils.getVirtualApi(clazz, config.withParentApi())));
             default -> throw new UnknownInputException();
         };
     }
 
-    private Map<MethodDeclaration, Method> filterDeprecated(Map<MethodDeclaration, Method> methods) {
-        return config.withDeprecated() ? methods : ReflectionUtils.removeDeprecated(methods);
+    private Map<MethodDeclaration, PsiMethod> filterDeprecated(Map<MethodDeclaration, PsiMethod> methods) {
+        return config.withDeprecated() ? methods : PsiUtils.removeDeprecated(methods);
     }
 
-    private Map<MethodDeclaration, Method> filterUnique(Map<MethodDeclaration, Method> methods) {
-        return config.withArguments() ? methods : ReflectionUtils.removeOverloads(methods);
+    private Map<MethodDeclaration, PsiMethod> filterUnique(Map<MethodDeclaration, PsiMethod> methods) {
+        return config.withArguments() ? methods : PsiUtils.removeOverloads(methods);
     }
 
-    public Comparator<? super Method> getSorting() {
+    public Comparator<? super PsiMethod> getSorting() {
         return config.withNaturalSorting()
-                ? comparing(Method::getName)
-                : comparing((Method method) -> {
+                ? comparing(PsiMethod::getName)
+                : comparing((PsiMethod method) -> {
                     String name = method.getName();
                     return name.startsWith("is") ? 1
                             : name.startsWith("has") ? 2
@@ -97,6 +100,6 @@ public class ExploreContext {
                             : name.startsWith("to") ? 5
                             : !name.startsWith("compare") ? 6
                             : 7;
-                }).thenComparing(Method::getName);
+                }).thenComparing(PsiMethod::getName);
     }
 }

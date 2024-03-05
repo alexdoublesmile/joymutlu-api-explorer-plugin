@@ -1,7 +1,11 @@
 package com.joymutlu.apiexplorer.strategy;
 
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiParameter;
+import com.intellij.psi.PsiType;
 import com.joymutlu.apiexplorer.model.ExploreContext;
 import com.joymutlu.apiexplorer.util.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 
@@ -14,7 +18,7 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
     private static final String REFERENCE_SUFFIX_DELIMITER = "And";
 
     @Override
-    public String generateApiLine(ExploreContext ctx, Method method) {
+    public String generateApiLine(ExploreContext ctx, PsiMethod method) {
         return new StringBuilder()
                 .append(resolveReference(method))
                 .append(ctx.getUserInput())
@@ -22,8 +26,8 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
                 .append(method.getName())
                 .append("(")
                 .append(StringUtils.getArgsString(
-                        stream(method.getParameterTypes())
-                                .map(Class::getName)
+                        stream(method.getParameterList().getParameters())
+                                .map(param -> param.getType().toString())
                                 .toList()))
                 .append(");")
                 .append("\n")
@@ -31,9 +35,9 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
                 .toString();
     }
 
-    private String resolveReference(Method method) {
-        final Class<?> returnType = method.getReturnType();
-        if (returnType.getName().equals("void")) {
+    private String resolveReference(PsiMethod method) {
+        final @Nullable PsiType returnType = method.getReturnType();
+        if (returnType.toString().equals("void")) {
             return "";
         }
         return new StringBuilder()
@@ -45,19 +49,19 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
                 .toString();
     }
 
-    private String resolveReturnType(Class<?> returnType) {
-        return returnType.getName().equals(ARRAY_DEFAULT_TYPE)
+    private String resolveReturnType(PsiType returnType) {
+        return returnType.toString().equals(ARRAY_DEFAULT_TYPE)
                 ? ARRAY_CUSTOM_TYPE
-                : returnType.getSimpleName();
+                : returnType.toString();
     }
 
-    private String resolveSuffix(Method method) {
-        if (method.getParameterTypes().length == 0) {
+    private String resolveSuffix(PsiMethod method) {
+        if (method.getParameterList().getParametersCount() == 0) {
             return "";
         }
-        final String result = REFERENCE_SUFFIX_START + stream(method.getParameterTypes())
-                .map(Class::getSimpleName)
-                .map(suffix -> suffix.replace("[]", "Array"))
+        final String result = REFERENCE_SUFFIX_START + stream(method.getParameterList().getParameters())
+                .map(PsiParameter::getType)
+                .map(paramType -> paramType.toString().replace("[]", "Array"))
                 .collect(StringBuilder::new, (sb1, sb2) -> sb1.append(sb2).append(REFERENCE_SUFFIX_DELIMITER), StringBuilder::append);
         return result.substring(0, result.length() - REFERENCE_SUFFIX_DELIMITER.length());
     }

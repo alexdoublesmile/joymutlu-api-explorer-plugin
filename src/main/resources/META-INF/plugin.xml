@@ -16,7 +16,7 @@
     <br/>
     - by object name: Type an object name and press the hotkey to generate all virtual methods of the object.
     <br/>
-    - by method pattern: Type a class/object name followed by a dot ("."), then type part of the desired API method (e.g., "someStr.is").
+    - by method pattern: Type a class/object name followed by a dot ("."), then type part of the desired API method (e.g. "someStr.is").
     Press the hotkey to generate all methods that start with that pattern.
     <br/><br/>
     Supported JDK Versions: Java 8 or later

@@ -3,8 +3,10 @@ package com.joymutlu.apiexplorer.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 public final class ImportUtils {
     public static final List<String> DEFAULT_PACKAGES = List.of(
@@ -28,7 +30,7 @@ public final class ImportUtils {
                 .map(s -> s.substring(
                         EditorConstants.IMPORT_STRING_PREFIX.length(),
                         s.length() - EditorConstants.ASTERISK_DECLARATION.length()))
-                .toList();
+                .collect(toList());
     }
 
     public static String getFullClassName(List<String> importList, String className) {
@@ -50,7 +52,7 @@ public final class ImportUtils {
                 .map(s -> s.substring(EditorConstants.IMPORT_STRING_PREFIX.length(), s.length() - 1))
                 .findFirst()
                 .orElse("");
-        System.out.println(fullClassName.isBlank()
+        System.out.println(fullClassName.isEmpty()
                 ? "Necessary Class was not found in imports"
                 : format("Full Class name: [%s]", fullClassName));
         return fullClassName;

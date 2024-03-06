@@ -7,11 +7,21 @@
     <depends>com.intellij.modules.java</depends>
 
     <description><![CDATA[
-    Explore source code and APIs for any Java library or framework.<br/><br/>
-    Generate methods:<br/>
-    - by class name: Type a class name and press the hotkey (default: Ctrl + Alt + E) on each letter. This generates all static methods of the class for exploration, calling, debugging, etc.<br/>
-    - by object name: Type an object name and press the hotkey to generate all virtual methods of the object.<br/>
-    - by method pattern: Type a class/object name followed by a dot ("."), then type part of the desired API method (e.g., "someStr.is"). Press the hotkey to generate all methods that start with that pattern.<br/>
+    Explore source code and APIs for any Java library or framework.
+    <br/><br/>
+    Generate methods:
+    <br/>
+    - by class name: Type a class name and press the hotkey (default: Ctrl + Alt + E) on any letter.
+    This generates all static methods of the class for exploration, calling, debugging, etc.
+    <br/>
+    - by object name: Type an object name and press the hotkey to generate all virtual methods of the object.
+    <br/>
+    - by method pattern: Type a class/object name followed by a dot ("."), then type part of the desired API method (e.g., "someStr.is").
+    Press the hotkey to generate all methods that start with that pattern.
+    <br/><br/>
+    Supported JDK Versions: Java 11 or later
+    <br/>
+    Supported IDE Versions: IntelliJ IDEA 2022.2.4 or later (Community and Ultimate editions)
   ]]></description>
     <change-notes>
         <![CDATA[

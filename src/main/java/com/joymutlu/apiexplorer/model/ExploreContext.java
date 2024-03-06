@@ -71,12 +71,14 @@ public class ExploreContext {
 
     public void setApi(PsiClass clazz) throws UnknownInputException {
         exploreClass = clazz;
-        api = switch (inputType) {
-            case TYPE -> filterDeprecated(filterUnique(
+        switch (inputType) {
+            case TYPE: api = filterDeprecated(filterUnique(
                     PsiUtils.getStaticApi(clazz)));
-            case OBJECT -> filterDeprecated(filterUnique(
+            break;
+            case OBJECT: api = filterDeprecated(filterUnique(
                     PsiUtils.getVirtualApi(clazz, config.withParentApi())));
-            default -> throw new UnknownInputException();
+            break;
+            default: throw new UnknownInputException();
         };
     }
 

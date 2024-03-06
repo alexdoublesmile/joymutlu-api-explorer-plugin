@@ -7,9 +7,8 @@ import com.joymutlu.apiexplorer.model.ExploreContext;
 import com.joymutlu.apiexplorer.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Method;
-
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 
 public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy {
     private static final String ARRAY_DEFAULT_TYPE = "[Ljava.lang.Object;";
@@ -28,7 +27,7 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
                 .append(StringUtils.getArgsString(
                         stream(method.getParameterList().getParameters())
                                 .map(param -> param.getType().toString())
-                                .toList()))
+                                .collect(toList())))
                 .append(");")
                 .append("\n")
                 .append(ctx.getIndent())

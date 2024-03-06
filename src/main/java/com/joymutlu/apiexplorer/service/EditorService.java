@@ -13,6 +13,8 @@ import com.joymutlu.apiexplorer.util.EditorConstants;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 public final class EditorService {
     private final Editor editor;
     private final Document document;
@@ -38,7 +40,7 @@ public final class EditorService {
         lineOffset = caretOffset - lineStartOffset;
         importList = Arrays.stream(editorText.split("\n"))
                 .filter(line -> line.startsWith(EditorConstants.IMPORT_STRING_PREFIX))
-                .toList();
+                .collect(toList());
         classSearchService = new ClassSearchService(editorText);
     }
 

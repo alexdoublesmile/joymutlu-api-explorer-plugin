@@ -19,14 +19,17 @@
     - by method pattern: Type a class/object name followed by a dot ("."), then type part of the desired API method (e.g., "someStr.is").
     Press the hotkey to generate all methods that start with that pattern.
     <br/><br/>
-    Supported JDK Versions: Java 11 or later
+    Supported JDK Versions: Java 8 or later
     <br/>
     Supported IDE Versions: IntelliJ IDEA 2022.2.4 or later (Community and Ultimate editions)
   ]]></description>
     <change-notes>
         <![CDATA[
       <ul>
-        <li><b>1.0</b><br/>
+        <li><b>1.0.1</b><br/>
+        - Improved compatibility with old JDK<br/>
+        </li>
+        <li><b>1.0.0</b><br/>
         First release (March 2024)<br/>
         - Default trigger Ctrl + Alt + E<br/>
         - Generate only unique name methods without default arguments.<br/>

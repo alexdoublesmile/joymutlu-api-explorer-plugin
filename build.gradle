@@ -21,6 +21,11 @@ sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
 tasks {
+    patchPluginXml {
+        sinceBuild.set("222")
+        untilBuild.set("232.*")
+    }
+
     signPlugin {
         certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
         privateKey.set(System.getenv("PRIVATE_KEY"))

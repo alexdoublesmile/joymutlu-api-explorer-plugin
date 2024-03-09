@@ -6,7 +6,7 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 
 public final class ClassUtils {
-    public static final Set<String> PRIMITIVE_SET = Set.of(
+    public static final Set<String> PRIMITIVE_SET = new HashSet<>(asList(
             "byte",
             "short",
             "int",
@@ -15,7 +15,7 @@ public final class ClassUtils {
             "double",
             "char",
             "boolean"
-    );
+    ));
 
     public static final Set<String> OBJECT_METHODS = new HashSet<>(asList(
             "equals",

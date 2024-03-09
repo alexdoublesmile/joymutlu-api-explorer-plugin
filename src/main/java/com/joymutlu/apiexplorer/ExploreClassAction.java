@@ -42,27 +42,26 @@ public class ExploreClassAction extends AnAction {
         System.out.println("-------- API Exploring triggered --------");
         ctx = buildExploreContext(e);
 
-
         final Project project = e.getRequiredData(PROJECT);
         final Editor editor = e.getRequiredData(EDITOR);
         editorService = new EditorService(editor);
         classLoadService = new ClassLoadService(project);
 
         try {
-            ctx.setUserInput(editorService.defineUserInput());
+            ctx.setUserInput(editorService.findUserInput());
             ctx.setIndent(editorService.getLineOffset() - ctx.getUserInput().getCaretOffset());
             System.out.printf("User input [%s] was defined as [%s] with indent size=[%d]%n",
-                    ctx.getUserInput(), ctx.getInputType().name(), ctx.getIndent().length());
+                    ctx.getUserInput(), ctx.getUserInput().getInputType().name(), ctx.getIndent().length());
 
             System.out.println("Scanning imports...");
             final List<String> importList = editorService.getImportList();
             System.out.printf("Imports: %s%n", importList);
-            final String className = editorService.defineClassName(ctx);
+            final String className = editorService.findClassName(ctx);
             System.out.printf("Necessary Class name: [%s]%n", className);
 
-            final PsiClass exploreClass = classLoadService.loadClass(importList, className);
-            System.out.printf("Loaded Class: [%s]%n", exploreClass);
-            ctx.setApi(exploreClass);
+            final PsiClass exploredClass = classLoadService.loadClass(importList, className);
+            System.out.printf("Loaded Class: [%s]%n", exploredClass);
+            ctx.setClassWithApi(exploredClass);
             final String generatedStr = codeGenerationService.generateApiString(ctx);
 
             runWriteCommandAction(project, () -> updateEditor(generatedStr));
@@ -84,7 +83,7 @@ public class ExploreClassAction extends AnAction {
     }
 
     private void updateEditor(String generatedCode) {
-        if (!generatedCode.isBlank()) {
+        if (!generatedCode.isEmpty()) {
             editorService.getDocument().replaceString(
                     ctx.getUserInput().getStartPosition(),
                     ctx.getUserInput().getEndPosition(),
@@ -92,6 +91,11 @@ public class ExploreClassAction extends AnAction {
         }
     }
 }
+
+// TODO: 09.03.2024 fix own package scan
+// TODO: 09.03.2024 fix description (press only existing var)
+// TODO: 01.03.2024 Generate API for method call
+// TODO: 27.02.2024 Generate API tree(for any depth without recursion)
 
 // TODO: 04.03.2024 Add menu with configuration:
 // - shortcut for gen strategy (unique, args, args + vars)
@@ -101,6 +105,4 @@ public class ExploreClassAction extends AnAction {
 // TODO: 01.03.2024 Generate API for one of repeatable names in file
 // TODO: 01.03.2024 Generate API for static class
 // TODO: 01.03.2024 Generate API for static field
-// TODO: 01.03.2024 Generate API for method call
-// TODO: 27.02.2024 Generate API tree(for any depth)
 // TODO: 01.03.2024 Generate API in lambda

@@ -1,20 +1,19 @@
 package com.joymutlu.apiexplorer.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 public final class ImportUtils {
-    public static final List<String> DEFAULT_PACKAGES = List.of(
+    public static final List<String> DEFAULT_PACKAGES = new ArrayList<>(asList(
             "java.lang",
             "java.lang.reflect"
-    );
+    ));
 
-    public static List<String> getPathList(List<String> importList) {
+    public static List<String> getImplicitPackages(List<String> importList) {
         System.out.println("Collecting asterisk and default declarations...");
 
         final ArrayList<String> result = new ArrayList<>();
@@ -33,22 +32,10 @@ public final class ImportUtils {
                 .collect(toList());
     }
 
-    public static String getFullClassName(List<String> importList, String className) {
+    public static String getDirectClassName(List<String> importList, String className) {
         String fullClassName = importList.stream()
-                .filter(importStr -> {
-                    final boolean hasClassName = importStr.endsWith(className + EditorConstants.DECLARATION_DELIMITER);
-                    System.out.println(hasClassName
-                            ? format("[%s] has class name", importStr)
-                            : format("[%s] doesn't fit", importStr));
-                    return hasClassName;
-                })
-                .filter(importStr -> {
-                    final boolean isFit = EditorConstants.PACKAGE_DELIMITER == importStr.charAt(importStr.length() - className.length() - 2);
-                    System.out.println(isFit
-                            ? format("[%s] exactly fits!", importStr)
-                            : format("[%s] doesn't exactly fit", importStr));
-                    return isFit;
-                })
+                .filter(importStr -> importStr.endsWith(className + EditorConstants.DECLARATION_DELIMITER))
+                .filter(importStr -> EditorConstants.PACKAGE_DELIMITER == importStr.charAt(importStr.length() - className.length() - 2))
                 .map(s -> s.substring(EditorConstants.IMPORT_STRING_PREFIX.length(), s.length() - 1))
                 .findFirst()
                 .orElse("");

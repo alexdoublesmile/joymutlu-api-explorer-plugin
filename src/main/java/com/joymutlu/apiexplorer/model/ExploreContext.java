@@ -4,35 +4,31 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.joymutlu.apiexplorer.exception.UnknownInputException;
 import com.joymutlu.apiexplorer.util.PsiUtils;
-import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.lang.Character.isLowerCase;
 import static java.lang.String.format;
 import static java.util.Comparator.comparing;
 
 public class ExploreContext {
     private final ExploreConfig config;
-    private UserInput userInput;
-    private InputType inputType;
+    private UserInputInfo inputInfo;
     private String indent;
-    private PsiClass exploreClass;
+    private PsiClass exploredClass;
     private Map<MethodDeclaration, PsiMethod> api = new HashMap<>();
 
     public ExploreContext(ExploreConfig config) {
         this.config = config;
     }
 
-    public UserInput getUserInput() {
-        return userInput;
+    public UserInputInfo getUserInput() {
+        return inputInfo;
     }
 
-    public void setUserInput(UserInput userInput) {
-        this.userInput = userInput;
-        setInputType(userInput.value());
+    public void setUserInput(UserInputInfo userInputInfo) {
+        this.inputInfo = userInputInfo;
     }
 
     public String getIndent() {
@@ -43,18 +39,8 @@ public class ExploreContext {
         indent = format("%-" + spacesNumber + "s", "");
     }
 
-    public PsiClass getExploreClass() {
-        return exploreClass;
-    }
-
-    public InputType getInputType() {
-        return inputType;
-    }
-
-    private void setInputType(String input) {
-        inputType = StringUtils.isUnknown(input)
-                ? InputType.UNKNOWN
-                : isLowerCase(input.charAt(0)) ? InputType.OBJECT : InputType.TYPE;
+    public PsiClass getExploredClass() {
+        return exploredClass;
     }
 
     public ApiViewType getApiViewType() {
@@ -69,9 +55,9 @@ public class ExploreContext {
         return new HashMap<>(api);
     }
 
-    public void setApi(PsiClass clazz) throws UnknownInputException {
-        exploreClass = clazz;
-        switch (inputType) {
+    public void setClassWithApi(PsiClass clazz) throws UnknownInputException {
+        exploredClass = clazz;
+        switch (inputInfo.getInputType()) {
             case TYPE: api = filterDeprecated(filterUnique(
                     PsiUtils.getStaticApi(clazz)));
             break;

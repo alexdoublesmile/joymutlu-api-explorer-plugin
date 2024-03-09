@@ -7,7 +7,7 @@ import com.intellij.openapi.util.TextRange;
 import com.joymutlu.apiexplorer.exception.NoInitializingLineException;
 import com.joymutlu.apiexplorer.exception.UnknownInputException;
 import com.joymutlu.apiexplorer.model.ExploreContext;
-import com.joymutlu.apiexplorer.model.UserInput;
+import com.joymutlu.apiexplorer.model.UserInputInfo;
 import com.joymutlu.apiexplorer.util.EditorConstants;
 
 import java.util.Arrays;
@@ -44,7 +44,7 @@ public final class EditorService {
         classSearchService = new ClassSearchService(editorText);
     }
 
-    public UserInput defineUserInput() {
+    public UserInputInfo findUserInput() {
         System.out.println("Defining user input...");
         int leftIdx = lineOffset - 1;
         int rightIdx = lineOffset;
@@ -60,13 +60,13 @@ public final class EditorService {
         final String[] fullInput = line.substring(leftIdx, rightIdx).split("\\.");
 
         String filter = fullInput.length == 2 ? fullInput[1] : "";
-        return new UserInput(fullInput[0], filter, caretOffset - leftStep, caretOffset + rightStep, leftStep);
+        return new UserInputInfo(fullInput[0], filter, caretOffset - leftStep, caretOffset + rightStep, leftStep);
     }
 
-    public String defineClassName(ExploreContext ctx) throws UnknownInputException, NoInitializingLineException {
-        switch (ctx.getInputType()) {
+    public String findClassName(ExploreContext ctx) throws UnknownInputException, NoInitializingLineException {
+        switch (ctx.getUserInput().getInputType()) {
             case TYPE: return ctx.getUserInput().value();
-            case OBJECT: return classSearchService.defineClassFromObject(ctx);
+            case OBJECT: return classSearchService.findClassNameByObject(ctx);
             default: throw new UnknownInputException();
         }
     }

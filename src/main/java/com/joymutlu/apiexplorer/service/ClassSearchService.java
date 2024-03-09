@@ -15,7 +15,7 @@ public final class ClassSearchService {
         this.editorText = editorText;
     }
 
-    public String defineClassFromObject(ExploreContext ctx) throws NoInitializingLineException {
+    public String findClassNameByObject(ExploreContext ctx) throws NoInitializingLineException {
         final String input = ctx.getUserInput().value();
         System.out.printf("Defining object [%s] type...%n", input);
         String initLine = StringUtils.findInitializingLine(editorText, input)
@@ -51,7 +51,7 @@ public final class ClassSearchService {
     }
 
     private boolean isInvalidDeclaration(String typeDeclaration) {
-        return typeDeclaration.isBlank() || isLowerCase(typeDeclaration);
+        return typeDeclaration.isEmpty() || isLowerCase(typeDeclaration);
     }
 
     private String resolveTypeFromGeneric(String[] elements, int idx) throws NoInitializingLineException {
@@ -82,14 +82,14 @@ public final class ClassSearchService {
     }
 
     private String resolveLowerCaseType(String[] elements, int idx, String typeDeclaration) throws NoInitializingLineException {
-        if (!typeDeclaration.isBlank() && isArray(typeDeclaration)) {
+        if (!typeDeclaration.isEmpty() && isArray(typeDeclaration)) {
             return "Array";
         }
-        if (typeDeclaration.isBlank() || isUndefinedLowerType(typeDeclaration)) {
+        if (typeDeclaration.isEmpty() || isUndefinedLowerType(typeDeclaration)) {
             for (int i = idx; i >= 0; i--) {
                 final String element = elements[i];
                 System.out.printf("Scanning for lowercase type [%s]", element);
-                if (!element.isBlank() && isUpperCase(element)) {
+                if (!element.isEmpty() && isUpperCase(element)) {
                     return element;
                 }
             }

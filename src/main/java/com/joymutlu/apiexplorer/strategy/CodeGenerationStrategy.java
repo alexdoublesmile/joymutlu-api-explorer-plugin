@@ -1,10 +1,8 @@
 package com.joymutlu.apiexplorer.strategy;
 
 import com.intellij.psi.PsiMethod;
-import com.joymutlu.apiexplorer.model.ExploreContext;
-
-import java.lang.reflect.Method;
+import com.joymutlu.apiexplorer.model.UserInput;
 
 public interface CodeGenerationStrategy {
-    String generateApiLine(ExploreContext ctx, PsiMethod method);
+    String generateApiLine(UserInput userInput, PsiMethod method);
 }

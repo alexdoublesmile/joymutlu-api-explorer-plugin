@@ -3,7 +3,7 @@ package com.joymutlu.apiexplorer.strategy;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiType;
-import com.joymutlu.apiexplorer.model.ExploreContext;
+import com.joymutlu.apiexplorer.model.UserInput;
 import com.joymutlu.apiexplorer.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,10 +17,10 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
     private static final String REFERENCE_SUFFIX_DELIMITER = "And";
 
     @Override
-    public String generateApiLine(ExploreContext ctx, PsiMethod method) {
+    public String generateApiLine(UserInput userInput, PsiMethod method) {
         return new StringBuilder()
                 .append(resolveReference(method))
-                .append(ctx.getUserInput())
+                .append(userInput)
                 .append(".")
                 .append(method.getName())
                 .append("(")
@@ -30,7 +30,7 @@ public class FullDeclarationGenerationStrategy implements CodeGenerationStrategy
                                 .collect(toList())))
                 .append(");")
                 .append("\n")
-                .append(ctx.getIndent())
+                .append(userInput.getIndent())
                 .toString();
     }
 

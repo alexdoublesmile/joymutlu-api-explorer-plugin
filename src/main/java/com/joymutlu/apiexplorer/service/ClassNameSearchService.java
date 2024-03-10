@@ -1,22 +1,20 @@
 package com.joymutlu.apiexplorer.service;
 
 import com.joymutlu.apiexplorer.exception.NoInitializingLineException;
-import com.joymutlu.apiexplorer.model.ExploreContext;
 import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.util.Arrays;
 
 import static com.joymutlu.apiexplorer.util.StringUtils.*;
 
-public final class ClassSearchService {
+public final class ClassNameSearchService {
     private final String editorText;
 
-    public ClassSearchService(String editorText) {
+    public ClassNameSearchService(String editorText) {
         this.editorText = editorText;
     }
 
-    public String findClassNameByObject(ExploreContext ctx) throws NoInitializingLineException {
-        final String input = ctx.getUserInput().value();
+    public String findClassNameByObject(String input) throws NoInitializingLineException {
         System.out.printf("Defining object [%s] type...%n", input);
         String initLine = StringUtils.findInitializingLine(editorText, input)
                 .orElseThrow(NoInitializingLineException::new);

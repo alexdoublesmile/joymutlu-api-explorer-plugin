@@ -5,10 +5,8 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
 import com.joymutlu.apiexplorer.model.MethodDeclaration;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -101,9 +99,5 @@ public final class PsiUtils {
                 .collect(Collectors.toMap(method ->
                         new MethodDeclaration(method.getName(), method.getParameterList()),
                         identity()));
-    }
-
-    public static String getSimpleName(PsiClass clazz) {
-        return clazz.getName().split(":")[1];
     }
 }

@@ -3,33 +3,38 @@ package com.joymutlu.apiexplorer.model;
 import com.joymutlu.apiexplorer.util.StringUtils;
 
 import static java.lang.Character.isLowerCase;
+import static java.lang.String.format;
 
-public class UserInputInfo {
-    private final String input;
-    private final InputType inputType;
+public class UserInput {
+    private final String value;
+    private final InputType type;
+    private final String indent;
     private final String filter;
     private final int startPosition;
     private final int endPosition;
-    private final int caretOffset;
 
-    public UserInputInfo(String input, String filter, int startPosition, int endPosition, int caretOffset) {
-        this.input = input;
+    public UserInput(String value, int spacesNumber, String filter, int startPosition, int endPosition) {
+        this.value = value;
         this.filter = filter;
         this.startPosition = startPosition;
         this.endPosition = endPosition;
-        this.caretOffset = caretOffset;
 
-        inputType = StringUtils.isUnknown(input)
+        indent = format("%-" + spacesNumber + "s", "");
+        type = StringUtils.isUnknown(value)
                 ? InputType.UNKNOWN
-                : isLowerCase(input.charAt(0)) ? InputType.OBJECT : InputType.TYPE;
+                : isLowerCase(value.charAt(0)) ? InputType.OBJECT : InputType.TYPE;
     }
 
-    public String value() {
-        return input;
+    public String getValue() {
+        return value;
     }
 
-    public InputType getInputType() {
-        return inputType;
+    public String getIndent() {
+        return indent;
+    }
+
+    public InputType getType() {
+        return type;
     }
 
     public int getStartPosition() {
@@ -40,16 +45,12 @@ public class UserInputInfo {
         return endPosition;
     }
 
-    public int getCaretOffset() {
-        return caretOffset;
-    }
-
     public String getFilter() {
         return filter;
     }
 
     @Override
     public String toString() {
-        return input;
+        return value;
     }
 }

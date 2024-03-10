@@ -17,10 +17,6 @@ public final class UserInputService {
     private final ClassNameSearchService classNameSearchService;
     private final UserInput userInput;
 
-    public UserInput getUserInput() {
-        return userInput;
-    }
-
     public UserInputService(Editor editor) {
         this.editor = editor;
         userInput = new InputInitService(editor.getDocument(), editor.getCaretModel().getPrimaryCaret())
@@ -44,5 +40,9 @@ public final class UserInputService {
         return Arrays.stream(editor.getDocument().getText().split("\n"))
                 .filter(line -> line.startsWith(EditorConstants.IMPORT_STRING_PREFIX))
                 .collect(toList());
+    }
+
+    public UserInput getUserInput() {
+        return userInput;
     }
 }

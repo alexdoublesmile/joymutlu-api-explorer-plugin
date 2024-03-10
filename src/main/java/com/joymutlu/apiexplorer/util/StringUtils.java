@@ -96,6 +96,6 @@ public final class StringUtils {
     }
 
     public static boolean isUnknown(String str) {
-        return str.isBlank() || !isLetter(str.charAt(0));
+        return str.isEmpty() || !isLetter(str.charAt(0));
     }
 }

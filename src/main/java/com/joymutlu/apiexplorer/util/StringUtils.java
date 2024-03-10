@@ -57,7 +57,8 @@ public final class StringUtils {
                 || line.contains(" " + objectName + ",")
                 || line.contains("..." + objectName + ")")
                 || line.contains("..." + objectName + " ")
-                || line.contains(" " + objectName + ")");
+                || line.contains(" " + objectName + ")")
+                || line.contains(" " + objectName);
     }
 
     public static String stripGenerics(String str) {

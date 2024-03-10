@@ -10,12 +10,14 @@ public class UserInput {
     private final InputType type;
     private final String indent;
     private final String filter;
+    private final int lineNumber;
     private final int startPosition;
     private final int endPosition;
 
-    public UserInput(String value, int spacesNumber, String filter, int startPosition, int endPosition) {
+    public UserInput(String value, int spacesNumber, String filter, int lineNumber, int startPosition, int endPosition) {
         this.value = value;
         this.filter = filter;
+        this.lineNumber = lineNumber;
         this.startPosition = startPosition;
         this.endPosition = endPosition;
 

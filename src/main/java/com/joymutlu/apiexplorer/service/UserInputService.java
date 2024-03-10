@@ -17,13 +17,14 @@ import static java.util.stream.Collectors.toList;
 public final class UserInputService {
     private final Editor editor;
     private final ClassNameSearchService classNameSearchService;
+    private final InputInitService inputInitService;
     private final UserInput userInput;
 
     public UserInputService(Editor editor) {
         this.editor = editor;
-        userInput = new InputInitService(editor.getDocument(), editor.getCaretModel().getPrimaryCaret())
-                .initUserInput();
         classNameSearchService = new ClassNameSearchService(editor.getDocument().getText());
+        inputInitService = new InputInitService(editor.getDocument(), editor.getCaretModel().getPrimaryCaret());
+        userInput = inputInitService.initUserInput();
     }
 
     public String findClassName() throws NoInitializingLineException, UnknownInputException {

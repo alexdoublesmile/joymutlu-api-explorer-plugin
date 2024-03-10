@@ -3,15 +3,14 @@ package com.joymutlu.apiexplorer.util;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
-import com.joymutlu.apiexplorer.model.MethodDeclaration;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public final class PsiUtils {
@@ -44,38 +43,34 @@ public final class PsiUtils {
         return !ClassUtils.OBJECT_METHODS.contains(method.getName());
     }
 
-    public static Map<MethodDeclaration, PsiMethod> getStaticApi(PsiClass clazz) {
+    public static List<PsiMethod> getStaticApi(PsiClass clazz) {
         System.out.printf("Collecting all public static methods from %s...%n", clazz.getName());
         return stream(clazz.getMethods())
                 .filter(PsiUtils::isPublic)
                 .filter(PsiUtils::isStatic)
                 .filter(PsiUtils::isNotObjectMethod)
-                .collect(toMap(method ->
-                                new MethodDeclaration(method.getName(), method.getParameterList()),
-                        identity()));
+                .collect(toList());
     }
 
     private static boolean isPublic(PsiMethod method) {
         return method.getModifierList().hasExplicitModifier(PsiModifier.PUBLIC) && !method.isConstructor();
     }
 
-    public static Map<MethodDeclaration, PsiMethod> getVirtualApi(PsiClass clazz, boolean withParentApi) {
+    public static List<PsiMethod> getVirtualApi(PsiClass clazz, boolean withParentApi) {
         System.out.printf("Collecting all public methods from %s...%n", clazz.getName());
-        final Map<MethodDeclaration, PsiMethod> result = stream(clazz.getMethods())
+        final List<PsiMethod> result = stream(clazz.getMethods())
                 .filter(PsiUtils::isPublic)
                 .filter(PsiUtils::isVirtual)
                 .filter(PsiUtils::isNotObjectMethod)
-                .collect(toMap(method ->
-                        new MethodDeclaration(method.getName(), method.getParameterList()),
-                        identity(), (m1, m2) -> m1));
+                .collect(toList());
 
         if (withParentApi) {
             final PsiClass parent = clazz.getSuperClass();
             final List<PsiClass> interfaces = asList(clazz.getInterfaces());
             if (isNotTopClass(parent)) {
-                result.putAll(getVirtualApi(parent, true));
+                result.addAll(getVirtualApi(parent, true));
             }
-            interfaces.forEach(i -> result.putAll(getVirtualApi(i, true)));
+            interfaces.forEach(i -> result.addAll(getVirtualApi(i, true)));
         }
         return result;
     }
@@ -84,20 +79,17 @@ public final class PsiUtils {
         return parent != null && !parent.getName().equals("java.lang.Object");
     }
 
-    public static Map<MethodDeclaration, PsiMethod> removeDeprecated(Map<MethodDeclaration, PsiMethod> methods) {
+    public static List<PsiMethod> removeDeprecated(List<PsiMethod> methods) {
         System.out.println("Removing deprecated methods...");
-        return methods.entrySet().stream()
-                .filter(entry -> PsiUtils.isNotDeprecated(entry.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return methods.stream()
+                .filter(PsiUtils::isNotDeprecated)
+                .collect(toList());
     }
 
-    public static Map<MethodDeclaration, PsiMethod> removeOverloads(Map<MethodDeclaration, PsiMethod> methods) {
+    public static List<PsiMethod> removeOverloads(List<PsiMethod> methods) {
         System.out.println("Removing overloaded methods...");
-        return methods.values().stream()
+        return new ArrayList<>(methods.stream()
                 .collect(toMap(PsiMethod::getName, identity(), (m1, m2) -> m1))
-                .values().stream()
-                .collect(Collectors.toMap(method ->
-                        new MethodDeclaration(method.getName(), method.getParameterList()),
-                        identity()));
+                .values());
     }
 }

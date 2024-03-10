@@ -6,11 +6,11 @@ import com.joymutlu.apiexplorer.config.PluginConfig;
 import com.joymutlu.apiexplorer.exception.NoApiException;
 import com.joymutlu.apiexplorer.model.ApiViewType;
 import com.joymutlu.apiexplorer.model.InputType;
-import com.joymutlu.apiexplorer.model.MethodDeclaration;
 import com.joymutlu.apiexplorer.model.UserInput;
 import com.joymutlu.apiexplorer.strategy.CodeGenerationStrategy;
 import com.joymutlu.apiexplorer.util.SortingUtils;
 
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
@@ -27,14 +27,13 @@ public final class CodeGenerationService {
         this.strategyMap = ApiViewType.getGenerationStrategyMap();
     }
 
-    public String generateApiString(PsiClass psiClass, Map<MethodDeclaration, PsiMethod> api) throws NoApiException {
+    public String generateApiString(PsiClass psiClass, List<PsiMethod> api) throws NoApiException {
         final UserInput userInput = userInputService.getUserInput();
         System.out.printf("Generating API from %d methods...%n", api.size());
         if (api.isEmpty()) {
             throw new NoApiException(format("No %sAPI for %s", userInput.getType() == InputType.TYPE ? "static " : "", psiClass.getName()));
         }
-        return api.values()
-                .stream()
+        return api.stream()
                 .filter(method -> method.getName().startsWith(userInput.getFilter()))
                 .sorted(SortingUtils.getSorting(config.getSortingType()))
                 .map(method -> strategyMap.get(config.getApiViewType())

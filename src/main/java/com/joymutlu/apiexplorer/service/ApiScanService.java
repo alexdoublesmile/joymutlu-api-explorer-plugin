@@ -4,10 +4,9 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.joymutlu.apiexplorer.config.PluginConfig;
 import com.joymutlu.apiexplorer.exception.UnknownInputException;
-import com.joymutlu.apiexplorer.model.MethodDeclaration;
 import com.joymutlu.apiexplorer.util.PsiUtils;
 
-import java.util.Map;
+import java.util.List;
 
 public final class ApiScanService {
     private final UserInputService userInputService;
@@ -18,7 +17,7 @@ public final class ApiScanService {
         this.config = config;
     }
 
-    public Map<MethodDeclaration, PsiMethod> findApi(PsiClass psiClass) throws UnknownInputException {
+    public List<PsiMethod> findApi(PsiClass psiClass) throws UnknownInputException {
         switch (userInputService.getUserInput().getType()) {
             case TYPE: return filterDeprecated(filterUnique(
                     PsiUtils.getStaticApi(psiClass)));
@@ -28,11 +27,11 @@ public final class ApiScanService {
         }
     }
 
-    private Map<MethodDeclaration, PsiMethod> filterDeprecated(Map<MethodDeclaration, PsiMethod> methods) {
+    private List<PsiMethod> filterDeprecated(List<PsiMethod> methods) {
         return config.withDeprecated() ? methods : PsiUtils.removeDeprecated(methods);
     }
 
-    private Map<MethodDeclaration, PsiMethod> filterUnique(Map<MethodDeclaration, PsiMethod> methods) {
+    private List<PsiMethod> filterUnique(List<PsiMethod> methods) {
         return config.withArguments() ? methods : PsiUtils.removeOverloads(methods);
     }
 }

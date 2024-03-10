@@ -93,7 +93,6 @@ public class ExploreClassAction extends AnAction {
 }
 
 // TODO: 09.03.2024 fix own package scan
-// TODO: 09.03.2024 fix description (press only existing var)
 // TODO: 01.03.2024 Generate API for method call
 // TODO: 27.02.2024 Generate API tree(for any depth without recursion)
 

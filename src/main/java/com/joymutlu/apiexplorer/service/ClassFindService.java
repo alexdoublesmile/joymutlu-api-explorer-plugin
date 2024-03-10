@@ -29,7 +29,7 @@ public final class ClassFindService {
         final Optional<PsiClass> maybeClass = findClassByName(getDirectClassName(importList, className), project);
         return maybeClass.isPresent()
                 ? maybeClass.get()
-                : findClassByNameList(getImplicitPackages(importList), className, project)
+                : findClassByNameList(getImplicitPackages(importList, userInputService.getCurrentPackage()), className, project)
                 .orElseThrow(() -> new NoImportException("Import for '" + className + "' class not found. Declare import first"));
     }
 

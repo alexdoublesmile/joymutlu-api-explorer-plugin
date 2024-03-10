@@ -11,7 +11,7 @@
     <br/><br/>
     Generate methods:
     <br/>
-    - by class name: Type a class name and press the hotkey (default: Ctrl + Alt + E) on any letter.
+    - by class name: Type a class name and press the hotkey on any letter (default: Ctrl + Alt + E, you can change it in keymap Settings).
     This generates all static methods of the class for exploration, calling, debugging, etc.
     <br/>
     - by object name: Type an existing object name and press the hotkey to generate all virtual methods of the object.
@@ -26,6 +26,10 @@
     <change-notes>
         <![CDATA[
       <ul>
+<!--        <li><b>1.0.2</b><br/>-->
+<!--        - Added API generation from any method call-->
+<!--        - Added API tree generation -->
+<!--        </li>-->
         <li><b>1.0.1</b><br/>
         - Improved compatibility with an old JDK<br/>
         </li>

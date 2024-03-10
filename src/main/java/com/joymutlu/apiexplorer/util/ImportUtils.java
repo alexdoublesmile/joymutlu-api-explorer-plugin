@@ -13,10 +13,11 @@ public final class ImportUtils {
             "java.lang.reflect"
     ));
 
-    public static List<String> getImplicitPackages(List<String> importList) {
+    public static List<String> getImplicitPackages(List<String> importList, String selfPackage) {
         System.out.println("Collecting asterisk and default declarations...");
 
         final ArrayList<String> result = new ArrayList<>();
+        result.add(selfPackage);
         result.addAll(DEFAULT_PACKAGES);
         result.addAll(getAsteriskDeclarations(importList));
         System.out.printf("Path applicants: %s%n", result);

@@ -10,6 +10,8 @@ import com.joymutlu.apiexplorer.util.EditorConstants;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.joymutlu.apiexplorer.util.EditorConstants.NEW_LINE;
+import static com.joymutlu.apiexplorer.util.EditorConstants.PACKAGE_STRING_PREFIX;
 import static java.util.stream.Collectors.toList;
 
 public final class UserInputService {
@@ -44,5 +46,12 @@ public final class UserInputService {
 
     public UserInput getUserInput() {
         return userInput;
+    }
+
+    public String getCurrentPackage() {
+        final String editorText = editor.getDocument().getText();
+        return editorText.substring(
+                PACKAGE_STRING_PREFIX.length(),
+                editorText.indexOf(NEW_LINE) - 1);
     }
 }

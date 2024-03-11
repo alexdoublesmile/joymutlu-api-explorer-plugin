@@ -4,18 +4,15 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.joymutlu.apiexplorer.config.PluginConfig;
-import com.joymutlu.apiexplorer.exception.NoApiException;
-import com.joymutlu.apiexplorer.exception.NoImportException;
-import com.joymutlu.apiexplorer.exception.NoInitializingLineException;
-import com.joymutlu.apiexplorer.exception.UnknownInputException;
-import com.joymutlu.apiexplorer.service.ApiScanService;
-import com.joymutlu.apiexplorer.service.ClassFindService;
-import com.joymutlu.apiexplorer.service.CodeGenerationService;
-import com.joymutlu.apiexplorer.service.UserInputService;
+import com.joymutlu.apiexplorer.exception.*;
+import com.joymutlu.apiexplorer.model.UserInput;
+import com.joymutlu.apiexplorer.service.*;
+import com.joymutlu.apiexplorer.strategy.classfind.ClassFindStrategyFactory;
 import org.jetbrains.annotations.NotNull;
 
 import static com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR;
@@ -24,8 +21,6 @@ import static com.intellij.openapi.command.WriteCommandAction.runWriteCommandAct
 import static com.intellij.openapi.ui.Messages.*;
 
 public class ExploreClassAction extends AnAction {
-    private UserInputService userInputService;
-
     @Override
     public void actionPerformed(AnActionEvent e) {
         System.out.println("-------- API Exploring triggered --------");
@@ -33,31 +28,34 @@ public class ExploreClassAction extends AnAction {
 
         final Project project = e.getRequiredData(PROJECT);
         final Editor editor = e.getRequiredData(EDITOR);
-        userInputService = new UserInputService(editor);
-        final ClassFindService classFindService = new ClassFindService(userInputService);
-        final ApiScanService apiScanService = new ApiScanService(userInputService, config);
-        final CodeGenerationService codeGenerationService = new CodeGenerationService(userInputService, config);
+        final UserInputService userInputService = new UserInputService(editor);
+        final ApiScanService apiScanService = new ApiScanService(config);
+        final CodeGenerationService codeGenerationService = new CodeGenerationService(config);
 
         try {
-            final PsiClass exploredClass = classFindService.findClass(project);
+            final UserInput userInput = userInputService.getUserInput();
+
+            final PsiClass exploredClass = ClassFindStrategyFactory.getStrategy(userInput.getType())
+                    .findClass(userInput, editor.getDocument().getText(), project);
+            System.out.printf("Found target class [%s]...%n", exploredClass);
+
             final String generatedStr = codeGenerationService.generateApiString(
-                    exploredClass, apiScanService.findApi(exploredClass));
+                    userInput,
+                    exploredClass,
+                    apiScanService.findApi(userInput, exploredClass));
 
-            runWriteCommandAction(project, () -> updateEditor(generatedStr));
+            runWriteCommandAction(project, () -> updateEditor(userInput, generatedStr, editor.getDocument()));
 
-        } catch (UnknownInputException | NoImportException ex) {
+        } catch (NoInitializingLineException | NoImportException ex) {
             showMessageDialog(project, ex.getMessage(), "Error", getErrorIcon());
-        } catch (NoInitializingLineException | NoApiException ex) {
+        } catch (NoApiException | PrimitiveTypeException | UnknownInputException ex) {
             showMessageDialog(project, ex.getMessage(), "Info", getInformationIcon());
         }
     }
 
-    private void updateEditor(String generatedCode) {
+    private void updateEditor(UserInput userInput, String generatedCode, @NotNull Document document) {
         if (!generatedCode.isEmpty()) {
-            userInputService.getDocument().replaceString(
-                    userInputService.getUserInput().getStartPosition(),
-                    userInputService.getUserInput().getEndPosition(),
-                    generatedCode);
+            document.replaceString(userInput.getStartPosition(), userInput.getEndPosition(), generatedCode);
         }
     }
 
@@ -83,6 +81,7 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
+// TODO: 01.03.2024 Fix no import returning types
 // TODO: 01.03.2024 Generate API for method call
 // TODO: 27.02.2024 Generate API tree(for any depth without recursion)
 

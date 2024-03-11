@@ -6,6 +6,7 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 
 public final class ClassUtils {
+    public static final String VOID = "void";
     public static final Set<String> PRIMITIVE_SET = new HashSet<>(asList(
             "byte",
             "short",

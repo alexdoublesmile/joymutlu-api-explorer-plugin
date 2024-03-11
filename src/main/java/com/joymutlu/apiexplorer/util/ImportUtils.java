@@ -41,8 +41,8 @@ public final class ImportUtils {
                 .findFirst()
                 .orElse("");
         System.out.println(fullClassName.isEmpty()
-                ? "Necessary Class was not found in imports"
-                : format("Full Class name: [%s]", fullClassName));
+                ? format("Necessary Class [%s] was not found in imports", className)
+                : format("Full Class name found in imports: [%s]", fullClassName));
         return fullClassName;
     }
 }

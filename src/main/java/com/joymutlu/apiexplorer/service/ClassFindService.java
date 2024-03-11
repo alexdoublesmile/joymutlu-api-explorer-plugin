@@ -5,50 +5,35 @@ import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.joymutlu.apiexplorer.exception.NoImportException;
-import com.joymutlu.apiexplorer.exception.NoInitializingLineException;
-import com.joymutlu.apiexplorer.exception.UnknownInputException;
+import com.joymutlu.apiexplorer.exception.PrimitiveTypeException;
+import com.joymutlu.apiexplorer.util.ClassUtils;
+import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.util.List;
-import java.util.Optional;
 
+import static com.joymutlu.apiexplorer.util.ClassUtils.VOID;
 import static com.joymutlu.apiexplorer.util.EditorConstants.PACKAGE_DELIMITER;
-import static com.joymutlu.apiexplorer.util.ImportUtils.getDirectClassName;
-import static com.joymutlu.apiexplorer.util.ImportUtils.getImplicitPackages;
-import static java.util.Optional.empty;
 
 public final class ClassFindService {
-    private final UserInputService userInputService;
+    public static PsiClass findClass(String className, List<String> importList, Project project) throws NoImportException, PrimitiveTypeException {
+        if (ClassUtils.PRIMITIVE_SET.contains(className) || VOID.equals(className)) {
+            throw new PrimitiveTypeException("You can't load methods from '" + className + "' type");
+        }
+        System.out.println("------ File Imports -----");
+        importList.forEach(System.out::println);
+        System.out.println("----------------------");
 
-    public ClassFindService(UserInputService userInputService) {
-        this.userInputService = userInputService;
-    }
-
-    public PsiClass findClass(Project project) throws UnknownInputException, NoInitializingLineException, NoImportException {
-        final List<String> importList = userInputService.getImportList();
-        final String className = userInputService.findClassName();
-        final Optional<PsiClass> maybeClass = findClassByName(getDirectClassName(importList, className), project);
-        return maybeClass.isPresent()
-                ? maybeClass.get()
-                : findClassByNameList(getImplicitPackages(importList, userInputService.getCurrentPackage()), className, project)
-                .orElseThrow(() -> new NoImportException("Import for '" + className + "' class not found. Declare import first"));
-    }
-
-    private Optional<PsiClass> findClassByName(String className, Project project) {
-        System.out.printf("Trying find Class by name [%s]...%n", className);
-        return Optional.ofNullable(JavaPsiFacade.getInstance(project)
-                .findClass(className, GlobalSearchScope.allScope(project)));
-    }
-
-    private Optional<PsiClass> findClassByNameList(List<String> pathList, String className, Project project) {
-        for (String path : pathList) {
+        for (String importStr : importList) {
+            final String path = StringUtils.resolveImport(importStr, className);
             String fullClassName = path + PACKAGE_DELIMITER + className;
+
             System.out.printf("Trying find Class by name [%s]...%n", fullClassName);
             PsiClass psiClass = JavaPsiFacade.getInstance(project)
                     .findClass(fullClassName, GlobalSearchScope.allScope(project));
             if (psiClass != null) {
-                return Optional.of(psiClass);
+                return psiClass;
             }
         }
-        return empty();
+        throw new NoImportException("Import for '" + className + "' class not found. Declare import first");
     }
 }

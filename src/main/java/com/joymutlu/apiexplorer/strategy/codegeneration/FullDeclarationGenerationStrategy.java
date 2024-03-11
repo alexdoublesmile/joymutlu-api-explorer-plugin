@@ -1,9 +1,10 @@
-package com.joymutlu.apiexplorer.strategy;
+package com.joymutlu.apiexplorer.strategy.codegeneration;
 
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiType;
 import com.joymutlu.apiexplorer.model.UserInput;
+import com.joymutlu.apiexplorer.strategy.codegeneration.CodeGenerationStrategy;
 import com.joymutlu.apiexplorer.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 

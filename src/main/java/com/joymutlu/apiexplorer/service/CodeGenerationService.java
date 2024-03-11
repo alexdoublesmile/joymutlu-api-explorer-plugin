@@ -7,7 +7,7 @@ import com.joymutlu.apiexplorer.exception.NoApiException;
 import com.joymutlu.apiexplorer.model.ApiViewType;
 import com.joymutlu.apiexplorer.model.InputType;
 import com.joymutlu.apiexplorer.model.UserInput;
-import com.joymutlu.apiexplorer.strategy.CodeGenerationStrategy;
+import com.joymutlu.apiexplorer.strategy.codegeneration.CodeGenerationStrategy;
 import com.joymutlu.apiexplorer.util.SortingUtils;
 
 import java.util.List;
@@ -18,17 +18,14 @@ import static java.lang.String.format;
 public final class CodeGenerationService {
     private final Map<ApiViewType, CodeGenerationStrategy> strategyMap;
 
-    private final UserInputService userInputService;
     private final PluginConfig config;
 
-    public CodeGenerationService(UserInputService userInputService, PluginConfig config) {
-        this.userInputService = userInputService;
+    public CodeGenerationService(PluginConfig config) {
         this.config = config;
         this.strategyMap = ApiViewType.getGenerationStrategyMap();
     }
 
-    public String generateApiString(PsiClass psiClass, List<PsiMethod> api) throws NoApiException {
-        final UserInput userInput = userInputService.getUserInput();
+    public String generateApiString(UserInput userInput, PsiClass psiClass, List<PsiMethod> api) throws NoApiException {
         System.out.printf("Generating API from %d methods...%n", api.size());
         if (api.isEmpty()) {
             throw new NoApiException(format("No %sAPI for %s", userInput.getType() == InputType.TYPE ? "static " : "", psiClass.getName()));

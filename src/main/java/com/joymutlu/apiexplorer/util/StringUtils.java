@@ -99,4 +99,28 @@ public final class StringUtils {
     public static boolean isUnknown(String str) {
         return str.isEmpty() || !isLetter(str.charAt(0));
     }
+
+    public static String getMethodNameFromCall(String methodCall) {
+        return methodCall.substring(0, methodCall.indexOf('('));
+    }
+
+    public static String resolveImport(String importStr, String className) {
+        if (importStr.endsWith(EditorConstants.ASTERISK_DECLARATION)) {
+            return importStr.substring(
+                    EditorConstants.IMPORT_STRING_PREFIX.length(),
+                    importStr.length() - EditorConstants.ASTERISK_DECLARATION.length());
+        }
+        if (importStr.startsWith("import ")) {
+            if (importStr.endsWith(className + EditorConstants.DECLARATION_DELIMITER)
+                    && EditorConstants.PACKAGE_DELIMITER == importStr.charAt(importStr.length() - className.length() - 2)) {
+                return importStr.substring(
+                        EditorConstants.IMPORT_STRING_PREFIX.length(),
+                        importStr.length() - className.length() - 2);
+            }
+            return importStr.substring(
+                    EditorConstants.IMPORT_STRING_PREFIX.length(),
+                    importStr.length() - 1);
+        }
+        return importStr;
+    }
 }

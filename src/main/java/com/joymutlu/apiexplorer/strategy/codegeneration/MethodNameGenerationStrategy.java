@@ -1,7 +1,8 @@
-package com.joymutlu.apiexplorer.strategy;
+package com.joymutlu.apiexplorer.strategy.codegeneration;
 
 import com.intellij.psi.PsiMethod;
 import com.joymutlu.apiexplorer.model.UserInput;
+import com.joymutlu.apiexplorer.strategy.codegeneration.CodeGenerationStrategy;
 
 public class MethodNameGenerationStrategy implements CodeGenerationStrategy {
 

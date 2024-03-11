@@ -4,24 +4,23 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.joymutlu.apiexplorer.config.PluginConfig;
 import com.joymutlu.apiexplorer.exception.UnknownInputException;
+import com.joymutlu.apiexplorer.model.UserInput;
 import com.joymutlu.apiexplorer.util.PsiUtils;
 
 import java.util.List;
 
 public final class ApiScanService {
-    private final UserInputService userInputService;
     private final PluginConfig config;
 
-    public ApiScanService(UserInputService userInputService, PluginConfig config) {
-        this.userInputService = userInputService;
+    public ApiScanService(PluginConfig config) {
         this.config = config;
     }
 
-    public List<PsiMethod> findApi(PsiClass psiClass) throws UnknownInputException {
-        switch (userInputService.getUserInput().getType()) {
-            case TYPE: return filterDeprecated(filterUnique(
+    public List<PsiMethod> findApi(UserInput userInput, PsiClass psiClass) throws UnknownInputException {
+        switch (userInput.getApiType()) {
+            case STATIC: return filterDeprecated(filterUnique(
                     PsiUtils.getStaticApi(psiClass)));
-            case OBJECT: return filterDeprecated(filterUnique(
+            case VIRTUAL: return filterDeprecated(filterUnique(
                     PsiUtils.getVirtualApi(psiClass, config.withParentApi())));
             default: throw new UnknownInputException();
         }

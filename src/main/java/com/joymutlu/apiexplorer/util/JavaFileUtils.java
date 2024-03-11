@@ -1,22 +1,32 @@
-package com.joymutlu.apiexplorer.service;
+package com.joymutlu.apiexplorer.util;
 
 import com.joymutlu.apiexplorer.exception.NoInitializingLineException;
-import com.joymutlu.apiexplorer.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.List;
 
+import static com.joymutlu.apiexplorer.util.EditorConstants.NEW_LINE;
+import static com.joymutlu.apiexplorer.util.EditorConstants.PACKAGE_STRING_PREFIX;
 import static com.joymutlu.apiexplorer.util.StringUtils.*;
+import static java.util.stream.Collectors.toList;
 
-public final class ClassNameSearchService {
-    private final String editorText;
+public final class JavaFileUtils {
 
-    public ClassNameSearchService(String editorText) {
-        this.editorText = editorText;
+    public static List<String> getImportList(String fileText) {
+        return Arrays.stream(fileText.split("\n"))
+                .filter(line -> line.startsWith(EditorConstants.IMPORT_STRING_PREFIX))
+                .collect(toList());
     }
 
-    public String findClassNameByObject(String input) throws NoInitializingLineException {
+    public static String getCurrentPackage(String fileText) {
+        return fileText.substring(
+                PACKAGE_STRING_PREFIX.length(),
+                fileText.indexOf(NEW_LINE) - 1);
+    }
+
+    public static String findClassNameByObject(String fileText, String input) throws NoInitializingLineException {
         System.out.printf("Defining object [%s] type...%n", input);
-        String initLine = StringUtils.findInitializingLine(editorText, input)
+        String initLine = StringUtils.findInitializingLine(fileText, input)
                 .orElseThrow(NoInitializingLineException::new);
         System.out.printf("Initialization line: [%s]%n", initLine);
 
@@ -28,7 +38,7 @@ public final class ClassNameSearchService {
         return objectType;
     }
 
-    private String resolveType(String[] elements, String referenceName) throws NoInitializingLineException {
+    private static String resolveType(String[] elements, String referenceName) throws NoInitializingLineException {
         for (int i = 0; i < elements.length; i++) {
             String element = elements[i].trim();
             if (element.equals(referenceName)) {
@@ -48,11 +58,11 @@ public final class ClassNameSearchService {
         throw new NoInitializingLineException();
     }
 
-    private boolean isInvalidDeclaration(String typeDeclaration) {
+    private static boolean isInvalidDeclaration(String typeDeclaration) {
         return typeDeclaration.isEmpty() || isLowerCase(typeDeclaration);
     }
 
-    private String resolveTypeFromGeneric(String[] elements, int idx) throws NoInitializingLineException {
+    private static String resolveTypeFromGeneric(String[] elements, int idx) throws NoInitializingLineException {
         int depth = 0;
         for (int i = idx; i >= 0; i--) {
             final String element = elements[i];
@@ -79,7 +89,7 @@ public final class ClassNameSearchService {
         throw new NoInitializingLineException();
     }
 
-    private String resolveLowerCaseType(String[] elements, int idx, String typeDeclaration) throws NoInitializingLineException {
+    private static String resolveLowerCaseType(String[] elements, int idx, String typeDeclaration) throws NoInitializingLineException {
         if (!typeDeclaration.isEmpty() && isArray(typeDeclaration)) {
             return "Array";
         }
@@ -93,5 +103,12 @@ public final class ClassNameSearchService {
             }
         }
         throw new NoInitializingLineException();
+    }
+
+    public static List<String> getFullImportList(String fileText) {
+        final List<String> importList = getImportList(fileText);
+        importList.add(JavaFileUtils.getCurrentPackage(fileText));
+        importList.addAll(ImportUtils.DEFAULT_PACKAGES);
+        return importList;
     }
 }

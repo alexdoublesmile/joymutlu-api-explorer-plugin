@@ -1,9 +1,9 @@
 package com.joymutlu.apiexplorer.model;
 
-import com.joymutlu.apiexplorer.strategy.CodeGenerationStrategy;
-import com.joymutlu.apiexplorer.strategy.FullDeclarationGenerationStrategy;
-import com.joymutlu.apiexplorer.strategy.MethodCallGenerationStrategy;
-import com.joymutlu.apiexplorer.strategy.MethodNameGenerationStrategy;
+import com.joymutlu.apiexplorer.strategy.codegeneration.CodeGenerationStrategy;
+import com.joymutlu.apiexplorer.strategy.codegeneration.FullDeclarationGenerationStrategy;
+import com.joymutlu.apiexplorer.strategy.codegeneration.MethodCallGenerationStrategy;
+import com.joymutlu.apiexplorer.strategy.codegeneration.MethodNameGenerationStrategy;
 
 import java.util.HashMap;
 import java.util.Map;

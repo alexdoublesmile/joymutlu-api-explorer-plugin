@@ -16,7 +16,9 @@
     <br/>
     - by object name: Type an existing object name and press the hotkey to generate all virtual methods of the object.
     <br/>
-    - by method pattern: Type a class/object name followed by a dot ("."), then type part of the desired API method (e.g. "someStr.is").
+    - by method call: On any letter of method call chain press the hotkey to generate all virtual methods of its return type.
+    <br/>
+    - by method pattern: Type something (class name / object name / method chain) followed by a dot ("."), then type part of the desired API method (e.g. "someStr.is").
     Press the hotkey to generate all methods that start with that pattern.
     <br/><br/>
     Supported JDK Versions: Java 8 or later
@@ -27,8 +29,8 @@
         <![CDATA[
       <ul>
         <li><b>1.0.2</b><br/>
-        - Added API generation from any method call
-        - Fixed minor bugs
+        - Added API generation from any method call chain<br/>
+        - Fixed minor bugs<br/>
         </li>
         <li><b>1.0.1</b><br/>
         - Improved compatibility with an old JDK<br/>

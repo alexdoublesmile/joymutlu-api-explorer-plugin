@@ -10,11 +10,17 @@ import com.joymutlu.apiexplorer.util.JavaFileUtils;
 
 public class ExplicitClassFindStrategy implements ClassFindStrategy {
     @Override
-    public PsiClass findClass(UserInput userInput, String fileText, Project project) throws NoImportException, PrimitiveTypeException {
-        String className = userInput.getValue();
+    public PsiClass findClass(UserInput userInput, String fileText, Project project)
+            throws NoImportException, PrimitiveTypeException {
 
-        final PsiClass exploredClass = ClassFindService.findClass(className, JavaFileUtils.getFullImportList(fileText), project);
+        return ClassFindService.findClass(
+                userInput.getValue(),
+                JavaFileUtils.getImportListWithDefaults(fileText),
+                project);
+    }
 
-        return exploredClass;
+    @Override
+    public String getName() {
+        return "Class Static API Searching Strategy";
     }
 }

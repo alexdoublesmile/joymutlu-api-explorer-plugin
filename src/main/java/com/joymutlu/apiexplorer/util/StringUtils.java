@@ -1,10 +1,14 @@
 package com.joymutlu.apiexplorer.util;
 
+import com.intellij.openapi.util.NlsSafe;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static com.joymutlu.apiexplorer.util.ClassUtils.PRIMITIVE_SET;
+import static com.joymutlu.apiexplorer.util.ClassUtils.VOID;
 import static java.lang.Character.isLetter;
 
 public final class StringUtils {
@@ -122,5 +126,17 @@ public final class StringUtils {
                     importStr.length() - 1);
         }
         return importStr;
+    }
+
+    public static boolean isInvalidReturnType(String returnType) {
+        return ClassUtils.PRIMITIVE_SET.contains(returnType) || VOID.equals(returnType);
+    }
+
+    public static boolean isValidReturnType(String returnType) {
+        return !isInvalidReturnType(returnType);
+    }
+
+    public static boolean isArrayType(String returnType) {
+        return returnType.endsWith("]");
     }
 }

@@ -19,10 +19,6 @@ public final class ClassFindService {
         if (ClassUtils.PRIMITIVE_SET.contains(className) || VOID.equals(className)) {
             throw new PrimitiveTypeException("You can't load methods from '" + className + "' type");
         }
-        System.out.println("------ File Imports -----");
-        importList.forEach(System.out::println);
-        System.out.println("----------------------");
-
         for (String importStr : importList) {
             final String path = StringUtils.resolveImport(importStr, className);
             String fullClassName = path + PACKAGE_DELIMITER + className;

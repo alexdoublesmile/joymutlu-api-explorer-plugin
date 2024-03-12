@@ -37,7 +37,7 @@ public class ExploreClassAction extends AnAction {
 
             final PsiClass exploredClass = ClassFindStrategyFactory.getStrategy(userInput.getType())
                     .findClass(userInput, editor.getDocument().getText(), project);
-            System.out.printf("Found target class [%s]...%n", exploredClass);
+            System.out.printf("Found target class [%s]%n", exploredClass);
 
             final String generatedStr = codeGenerationService.generateApiString(
                     userInput,
@@ -46,9 +46,9 @@ public class ExploreClassAction extends AnAction {
 
             runWriteCommandAction(project, () -> updateEditor(userInput, generatedStr, editor.getDocument()));
 
-        } catch (NoInitializingLineException | NoImportException ex) {
+        } catch (NoInitializingLineException ex) {
             showMessageDialog(project, ex.getMessage(), "Error", getErrorIcon());
-        } catch (NoApiException | PrimitiveTypeException | UnknownInputException ex) {
+        } catch (NoApiException | PrimitiveTypeException | UnknownInputException | NoMethodException | NoImportException ex) {
             showMessageDialog(project, ex.getMessage(), "Info", getInformationIcon());
         }
     }

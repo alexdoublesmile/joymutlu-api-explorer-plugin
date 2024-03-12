@@ -2,8 +2,6 @@ package com.joymutlu.apiexplorer.model;
 
 import com.joymutlu.apiexplorer.util.StringUtils;
 
-import static java.lang.Character.isLowerCase;
-import static java.lang.Character.isUpperCase;
 import static java.lang.String.format;
 
 public class UserInput {
@@ -44,13 +42,13 @@ public class UserInput {
         }
         final String[] splittedInput = value.split("\\.");
         if (splittedInput.length == 1) {
-            if (isLowerCase(value.charAt(0))) {
+            if (StringUtils.isLowerCase(value)) {
                 return InputType.OBJECT;
             } else {
                 return InputType.TYPE;
             }
         }
-        if (isUpperCase(splittedInput[splittedInput.length - 2].charAt(0))) {
+        if (StringUtils.isUpperCase(value)) {
             return InputType.STATIC_METHOD;
         } else {
             return InputType.VIRTUAL_METHOD;

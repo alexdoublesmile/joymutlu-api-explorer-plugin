@@ -11,6 +11,12 @@ import static com.joymutlu.apiexplorer.util.StringUtils.*;
 import static java.util.stream.Collectors.toList;
 
 public final class JavaFileUtils {
+    public static List<String> getImportListWithDefaults(String fileText) {
+        final List<String> importList = getImportList(fileText);
+        importList.add(getCurrentPackage(fileText));
+        importList.addAll(ImportUtils.DEFAULT_PACKAGES);
+        return importList;
+    }
 
     public static List<String> getImportList(String fileText) {
         return Arrays.stream(fileText.split("\n"))
@@ -24,16 +30,16 @@ public final class JavaFileUtils {
                 fileText.indexOf(NEW_LINE) - 1);
     }
 
-    public static String findClassNameByObject(String fileText, String input) throws NoInitializingLineException {
-        System.out.printf("Defining object [%s] type...%n", input);
-        String initLine = StringUtils.findInitializingLine(fileText, input)
+    public static String findClassNameByObject(String fileText, String objName) throws NoInitializingLineException {
+        System.out.printf("Defining object [%s] type...%n", objName);
+        String initLine = StringUtils.findInitializingLine(fileText, objName)
                 .orElseThrow(NoInitializingLineException::new);
         System.out.printf("Initialization line: [%s]%n", initLine);
 
         final String[] initLineElements = initLine.trim().split("[ ;=(),]");
-        System.out.printf("Elements: [%s]%n", Arrays.toString(initLineElements));
+        System.out.printf("Init line Elements: [%s]%n", Arrays.toString(initLineElements));
 
-        String objectType = resolveType(initLineElements, input);
+        String objectType = resolveType(initLineElements, objName);
         System.out.printf("Object type defined as [%s]%n", objectType);
         return objectType;
     }
@@ -103,12 +109,5 @@ public final class JavaFileUtils {
             }
         }
         throw new NoInitializingLineException();
-    }
-
-    public static List<String> getFullImportList(String fileText) {
-        final List<String> importList = getImportList(fileText);
-        importList.add(JavaFileUtils.getCurrentPackage(fileText));
-        importList.addAll(ImportUtils.DEFAULT_PACKAGES);
-        return importList;
     }
 }

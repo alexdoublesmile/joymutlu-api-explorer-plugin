@@ -19,12 +19,12 @@ public enum InputType {
     }, STATIC_METHOD {
         @Override
         public ClassFindStrategy getClassFindStrategy() {
-            return new ClassByStaticMethodFindStrategy();
+            return new ClassByMethodFindStrategy();
         }
     }, VIRTUAL_METHOD {
         @Override
         public ClassFindStrategy getClassFindStrategy() {
-            return new ClassByVirtualMethodFindStrategy();
+            return new ClassByMethodFindStrategy();
         }
     }, UNKNOWN {
         @Override
@@ -40,6 +40,5 @@ public enum InputType {
         }
         return map;
     }
-
     public abstract ClassFindStrategy getClassFindStrategy();
 }

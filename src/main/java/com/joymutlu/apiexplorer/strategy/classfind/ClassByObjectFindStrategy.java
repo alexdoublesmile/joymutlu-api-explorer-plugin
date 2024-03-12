@@ -11,9 +11,17 @@ import com.joymutlu.apiexplorer.util.JavaFileUtils;
 
 public class ClassByObjectFindStrategy implements ClassFindStrategy {
     @Override
-    public PsiClass findClass(UserInput userInput, String fileText, Project project) throws NoImportException, PrimitiveTypeException, NoInitializingLineException {
-        final String className = JavaFileUtils.findClassNameByObject(fileText, userInput.getValue());
-        final PsiClass exploredClass = ClassFindService.findClass(className, JavaFileUtils.getFullImportList(fileText), project);
-        return exploredClass;
+    public PsiClass findClass(UserInput userInput, String fileText, Project project)
+            throws NoImportException, PrimitiveTypeException, NoInitializingLineException {
+
+        return ClassFindService.findClass(
+                JavaFileUtils.findClassNameByObject(fileText, userInput.getValue()),
+                JavaFileUtils.getImportListWithDefaults(fileText),
+                project);
+    }
+
+    @Override
+    public String getName() {
+        return "Object Reference API Searching Strategy";
     }
 }

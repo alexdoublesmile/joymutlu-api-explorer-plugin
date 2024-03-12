@@ -39,7 +39,6 @@ public final class InputInitService {
         int leftStep = lineOffset - leftIdx;
         int rightStep = rightIdx - lineOffset;
         final String[] fullInput = line.substring(leftIdx, rightIdx).split("\\.");
-        System.out.println("Full input=" + Arrays.toString(fullInput));
 
         String filter = "";
         if (fullInput.length > 1 && endsWithLetter(fullInput[fullInput.length - 1])) {

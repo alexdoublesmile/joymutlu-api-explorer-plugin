@@ -10,4 +10,9 @@ public class UnknownStrategy implements ClassFindStrategy {
     public PsiClass findClass(UserInput userInput, String fileText, Project project) throws UnknownInputException {
         throw new UnknownInputException();
     }
+
+    @Override
+    public String getName() {
+        return null;
+    }
 }

@@ -28,6 +28,7 @@
       <ul>
         <li><b>1.0.2</b><br/>
         - Added API generation from any method call
+        - Fixed minor bugs
         </li>
         <li><b>1.0.1</b><br/>
         - Improved compatibility with an old JDK<br/>

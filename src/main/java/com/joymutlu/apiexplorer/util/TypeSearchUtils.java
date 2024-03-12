@@ -3,44 +3,21 @@ package com.joymutlu.apiexplorer.util;
 import com.joymutlu.apiexplorer.exception.NoInitializingLineException;
 
 import java.util.Arrays;
-import java.util.List;
 
-import static com.joymutlu.apiexplorer.util.EditorConstants.NEW_LINE;
-import static com.joymutlu.apiexplorer.util.EditorConstants.PACKAGE_STRING_PREFIX;
 import static com.joymutlu.apiexplorer.util.StringUtils.*;
-import static java.util.stream.Collectors.toList;
 
-public final class JavaFileUtils {
-    public static List<String> getImportListWithDefaults(String fileText) {
-        final List<String> importList = getImportList(fileText);
-        importList.add(getCurrentPackage(fileText));
-        importList.addAll(ImportUtils.DEFAULT_PACKAGES);
-        return importList;
-    }
-
-    public static List<String> getImportList(String fileText) {
-        return Arrays.stream(fileText.split("\n"))
-                .filter(line -> line.startsWith(EditorConstants.IMPORT_STRING_PREFIX))
-                .collect(toList());
-    }
-
-    public static String getCurrentPackage(String fileText) {
-        return fileText.substring(
-                PACKAGE_STRING_PREFIX.length(),
-                fileText.indexOf(NEW_LINE) - 1);
-    }
-
-    public static String findClassNameByObject(String fileText, String objName) throws NoInitializingLineException {
-        System.out.printf("Defining object [%s] type...%n", objName);
-        String initLine = StringUtils.findInitializingLine(fileText, objName)
+public final class TypeSearchUtils {
+    public static String findTypeByReference(String fileText, String reference) throws NoInitializingLineException {
+        System.out.printf("Defining reference [%s] type...%n", reference);
+        String initLine = StringUtils.findInitializingLine(fileText, reference)
                 .orElseThrow(NoInitializingLineException::new);
         System.out.printf("Initialization line: [%s]%n", initLine);
 
         final String[] initLineElements = initLine.trim().split("[ ;=(),]");
         System.out.printf("Init line Elements: [%s]%n", Arrays.toString(initLineElements));
 
-        String objectType = resolveType(initLineElements, objName);
-        System.out.printf("Object type defined as [%s]%n", objectType);
+        String objectType = resolveType(initLineElements, reference);
+        System.out.printf("Reference type defined as [%s]%n", objectType);
         return objectType;
     }
 

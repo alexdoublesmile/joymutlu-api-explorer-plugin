@@ -28,7 +28,7 @@ public final class CodeGenerationService {
     public String generateApiString(UserInput userInput, PsiClass psiClass, List<PsiMethod> api) throws NoApiException {
         System.out.printf("Generating API from %d methods...%n", api.size());
         if (api.isEmpty()) {
-            throw new NoApiException(format("No %sAPI for %s type. Maybe it's generic or marker interface", userInput.getType() == InputType.TYPE ? "static " : "", psiClass.getName()));
+            throw new NoApiException(format("No %sAPI for [%s] type", userInput.getType() == InputType.TYPE ? "static " : "", psiClass.getName()));
         }
         return api.stream()
                 .filter(method -> method.getName().startsWith(userInput.getFilter()))

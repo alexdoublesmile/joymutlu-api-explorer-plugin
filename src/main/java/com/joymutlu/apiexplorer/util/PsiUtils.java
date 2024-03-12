@@ -1,12 +1,19 @@
 package com.joymutlu.apiexplorer.util;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifier;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.joymutlu.apiexplorer.exception.NoImportException;
+import com.joymutlu.apiexplorer.exception.PrimitiveTypeException;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.joymutlu.apiexplorer.util.ClassConstants.VOID;
+import static com.joymutlu.apiexplorer.util.EditorConstants.PACKAGE_DELIMITER;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.function.Function.identity;
@@ -40,7 +47,7 @@ public final class PsiUtils {
     }
 
     public static boolean isNotObjectMethod(PsiMethod method) {
-        return !ClassUtils.OBJECT_METHODS.contains(method.getName());
+        return !ClassConstants.OBJECT_METHODS.contains(method.getName());
     }
 
     public static List<PsiMethod> getStaticApi(PsiClass clazz) {
@@ -91,5 +98,23 @@ public final class PsiUtils {
         return new ArrayList<>(methods.stream()
                 .collect(toMap(PsiMethod::getName, identity(), (m1, m2) -> m1))
                 .values());
+    }
+
+    public static PsiClass findClass(String className, List<String> importList, Project project) throws NoImportException, PrimitiveTypeException {
+        if (ClassConstants.PRIMITIVE_SET.contains(className) || VOID.equals(className)) {
+            throw new PrimitiveTypeException("You can't load methods from '" + className + "' type");
+        }
+        for (String importStr : importList) {
+            final String path = StringUtils.resolveImport(importStr, className);
+            String fullClassName = path + PACKAGE_DELIMITER + className;
+
+            System.out.printf("Trying find Class by name [%s]...%n", fullClassName);
+            PsiClass psiClass = JavaPsiFacade.getInstance(project)
+                    .findClass(fullClassName, GlobalSearchScope.allScope(project));
+            if (psiClass != null) {
+                return psiClass;
+            }
+        }
+        throw new NoImportException("Import for '" + className + "' class not found. Declare import first");
     }
 }

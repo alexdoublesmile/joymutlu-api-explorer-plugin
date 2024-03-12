@@ -1,14 +1,11 @@
 package com.joymutlu.apiexplorer.util;
 
-import com.intellij.openapi.util.NlsSafe;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static com.joymutlu.apiexplorer.util.ClassUtils.PRIMITIVE_SET;
-import static com.joymutlu.apiexplorer.util.ClassUtils.VOID;
+import static com.joymutlu.apiexplorer.util.ClassConstants.PRIMITIVE_SET;
+import static com.joymutlu.apiexplorer.util.ClassConstants.VOID;
 import static java.lang.Character.isLetter;
 
 public final class StringUtils {
@@ -115,11 +112,12 @@ public final class StringUtils {
                     importStr.length() - EditorConstants.ASTERISK_DECLARATION.length());
         }
         if (importStr.startsWith("import ")) {
+            final int importPackageEndIdx = importStr.length() - className.length() - 2;
             if (importStr.endsWith(className + EditorConstants.DECLARATION_DELIMITER)
-                    && EditorConstants.PACKAGE_DELIMITER == importStr.charAt(importStr.length() - className.length() - 2)) {
+                    && EditorConstants.PACKAGE_DELIMITER == importStr.charAt(importPackageEndIdx)) {
                 return importStr.substring(
                         EditorConstants.IMPORT_STRING_PREFIX.length(),
-                        importStr.length() - className.length() - 2);
+                        importPackageEndIdx);
             }
             return importStr.substring(
                     EditorConstants.IMPORT_STRING_PREFIX.length(),
@@ -129,7 +127,7 @@ public final class StringUtils {
     }
 
     public static boolean isInvalidReturnType(String returnType) {
-        return ClassUtils.PRIMITIVE_SET.contains(returnType) || VOID.equals(returnType);
+        return ClassConstants.PRIMITIVE_SET.contains(returnType) || VOID.equals(returnType);
     }
 
     public static boolean isValidReturnType(String returnType) {

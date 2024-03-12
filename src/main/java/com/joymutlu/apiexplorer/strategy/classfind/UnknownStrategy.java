@@ -13,6 +13,6 @@ public class UnknownStrategy implements ClassFindStrategy {
 
     @Override
     public String getName() {
-        return null;
+        return "";
     }
 }

@@ -5,8 +5,6 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;
 import com.joymutlu.apiexplorer.model.UserInput;
 
-import java.util.Arrays;
-
 import static com.joymutlu.apiexplorer.util.EditorConstants.SPACE;
 import static java.lang.String.join;
 

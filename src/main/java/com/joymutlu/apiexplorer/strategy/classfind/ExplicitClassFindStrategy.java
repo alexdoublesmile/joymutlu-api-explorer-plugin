@@ -5,17 +5,17 @@ import com.intellij.psi.PsiClass;
 import com.joymutlu.apiexplorer.exception.NoImportException;
 import com.joymutlu.apiexplorer.exception.PrimitiveTypeException;
 import com.joymutlu.apiexplorer.model.UserInput;
-import com.joymutlu.apiexplorer.service.ClassFindService;
-import com.joymutlu.apiexplorer.util.JavaFileUtils;
+import com.joymutlu.apiexplorer.util.ImportUtils;
+import com.joymutlu.apiexplorer.util.PsiUtils;
 
 public class ExplicitClassFindStrategy implements ClassFindStrategy {
     @Override
     public PsiClass findClass(UserInput userInput, String fileText, Project project)
             throws NoImportException, PrimitiveTypeException {
 
-        return ClassFindService.findClass(
+        return PsiUtils.findClass(
                 userInput.getValue(),
-                JavaFileUtils.getImportListWithDefaults(fileText),
+                ImportUtils.getImportListWithDefaults(fileText),
                 project);
     }
 

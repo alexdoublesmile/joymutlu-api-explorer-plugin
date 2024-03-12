@@ -11,8 +11,8 @@ import com.joymutlu.apiexplorer.exception.NoMethodException;
 import com.joymutlu.apiexplorer.exception.PrimitiveTypeException;
 import com.joymutlu.apiexplorer.model.InputType;
 import com.joymutlu.apiexplorer.model.UserInput;
-import com.joymutlu.apiexplorer.service.ClassFindService;
-import com.joymutlu.apiexplorer.util.JavaFileUtils;
+import com.joymutlu.apiexplorer.util.ImportUtils;
+import com.joymutlu.apiexplorer.util.TypeSearchUtils;
 import com.joymutlu.apiexplorer.util.PsiUtils;
 import com.joymutlu.apiexplorer.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -29,19 +29,20 @@ public class ClassByMethodFindStrategy implements ClassFindStrategy {
     @Override
     public PsiClass findClass(UserInput userInput, String fileText, Project project)
             throws NoImportException, PrimitiveTypeException, NoInitializingLineException, NoMethodException {
-
         final String[] callElements = userInput.getValue().split("\\.");
-        String invokerObj = callElements[0];
         List<String> invokeChain = Arrays.stream(callElements)
                 .skip(1)
                 .map(StringUtils::getMethodNameFromCall)
                 .collect(toList());
 
+        String invokerObj = callElements[0];
         String invokerName = userInput.getType() == InputType.STATIC_METHOD
-                ? invokerObj :
-                JavaFileUtils.findClassNameByObject(fileText, invokerObj);
-        List<String> importList = JavaFileUtils.getImportListWithDefaults(fileText);
-        PsiClass invoker = ClassFindService.findClass(invokerName, importList, project);
+                ? invokerObj
+                : TypeSearchUtils.findTypeByReference(fileText, invokerObj);
+        PsiClass invoker = PsiUtils.findClass(
+                invokerName,
+                ImportUtils.getImportListWithDefaults(fileText),
+                project);
         System.out.printf("Root invoker type [%s]%n", invoker);
 
         for (String methodName : invokeChain) {

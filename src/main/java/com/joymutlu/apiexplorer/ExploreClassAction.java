@@ -11,7 +11,9 @@ import com.intellij.psi.PsiClass;
 import com.joymutlu.apiexplorer.config.PluginConfig;
 import com.joymutlu.apiexplorer.exception.*;
 import com.joymutlu.apiexplorer.model.UserInput;
-import com.joymutlu.apiexplorer.service.*;
+import com.joymutlu.apiexplorer.service.ApiScanService;
+import com.joymutlu.apiexplorer.service.CodeGenerationService;
+import com.joymutlu.apiexplorer.service.UserInputService;
 import com.joymutlu.apiexplorer.strategy.classfind.ClassFindStrategyFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,9 +48,9 @@ public class ExploreClassAction extends AnAction {
 
             runWriteCommandAction(project, () -> updateEditor(userInput, generatedStr, editor.getDocument()));
 
-        } catch (NoInitializingLineException ex) {
+        } catch (NoInitializingLineException | UnknownInputException ex) {
             showMessageDialog(project, ex.getMessage(), "Error", getErrorIcon());
-        } catch (NoApiException | PrimitiveTypeException | UnknownInputException | NoMethodException | NoImportException ex) {
+        } catch (NoApiException | PrimitiveTypeException | NoMethodException | NoImportException | GenericSearchException ex) {
             showMessageDialog(project, ex.getMessage(), "Info", getInformationIcon());
         }
     }
@@ -81,16 +83,13 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
-// TODO: 01.03.2024 Fix no import returning types
-// TODO: 01.03.2024 Generate API for method call
-// TODO: 27.02.2024 Generate API tree(for any depth without recursion)
-
 // TODO: 04.03.2024 Add menu with configuration:
 // - shortcut for gen strategy (unique, args, args + vars)
 // - sorting by name & group, by name only, by class order, by args count & type, by return value...
 // - filtering (deprecated, Object, customize exclusion by pattern, exclude parent, separate parent, include static vars)
 // - tree generation depth
-// TODO: 01.03.2024 Generate API for one of repeatable names in file
 // TODO: 01.03.2024 Generate API for static class
 // TODO: 01.03.2024 Generate API for static field
+// TODO: 01.03.2024 Generate API for one of repeatable names in file
+// TODO: 27.02.2024 Generate API tree(for any depth without recursion)
 // TODO: 01.03.2024 Generate API in lambda

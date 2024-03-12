@@ -24,7 +24,7 @@ public final class ApiScanService {
         final String psiType = psiTypeNameElements[0];
         final String psiName = psiTypeNameElements[1];
         if (psiType.equals("PsiTypeParameter")) {
-            throw new GenericSearchException(format("You can't get methods from Generic [%s] type", psiName));
+            throw new GenericSearchException(format("You can't load methods from Generic [%s] type", psiName));
         }
         switch (userInput.getApiType()) {
             case STATIC: return filterDeprecated(filterUnique(

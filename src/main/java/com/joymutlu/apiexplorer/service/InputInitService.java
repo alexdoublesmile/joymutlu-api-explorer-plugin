@@ -36,7 +36,7 @@ public final class InputInitService {
         }
         int leftStep = lineOffset - leftIdx;
         int rightStep = rightIdx - lineOffset;
-        final String[] fullInput = line.substring(leftIdx, rightIdx).split("\\.");
+        final String[] fullInput = line.substring(leftIdx, rightIdx).split("[.;]");
 
         String filter = "";
         if (fullInput.length > 1 && endsWithLetter(fullInput[fullInput.length - 1])) {
@@ -70,8 +70,7 @@ public final class InputInitService {
     }
 
     private boolean isInputEnd(int idx) {
-        return line.charAt(idx) == ' '
-                || line.charAt(idx) == ';';
+        return line.charAt(idx) == ' ';
     }
 
     private boolean isInputStart(int idx) {

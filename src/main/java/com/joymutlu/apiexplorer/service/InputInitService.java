@@ -5,6 +5,8 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.util.TextRange;
 import com.joymutlu.apiexplorer.model.UserInput;
 
+import java.util.Arrays;
+
 import static com.joymutlu.apiexplorer.util.EditorConstants.SPACE;
 import static java.lang.String.join;
 
@@ -25,27 +27,24 @@ public final class InputInitService {
 
     public UserInput initUserInput() {
         System.out.println("Defining user input...");
-        int leftIdx = lineOffset - 1;
-        int rightIdx = lineOffset;
-        while (leftIdx >= 0 && !isInputStart(leftIdx)) {
-            leftIdx--;
-        }
-        leftIdx++;
-        while (rightIdx < line.length() && !isInputEnd(rightIdx)) {
-            rightIdx++;
-        }
-        int leftStep = lineOffset - leftIdx;
-        int rightStep = rightIdx - lineOffset;
-        final String[] fullInput = line.substring(leftIdx, rightIdx).split("[.;]");
+        final int leftIdx = getLeftInputIdx();
+        final int rightIdx = getRightInputIdx();
+        final int leftStep = lineOffset - leftIdx;
+        final int rightStep = rightIdx - lineOffset;
+        String fullInput = line.substring(leftIdx, rightIdx);
+        System.out.println("Full Input=" + fullInput);
 
+        String[] inputElements = fullInput.split("[.;]");
         String filter = "";
-        if (fullInput.length > 1 && endsWithLetter(fullInput[fullInput.length - 1])) {
-            filter =  fullInput[fullInput.length - 1];
-            fullInput[fullInput.length - 1] = "";
+        if (hasFilter(inputElements)) {
+            filter = inputElements[inputElements.length - 1];
+            inputElements = stripLastElement(inputElements);
         }
-        final String value = join(".", fullInput);
+
+        final String value = join(".", inputElements);
         int indentNumber = getSpaceNumber();
         System.out.println("Input=" + value);
+        System.out.println("Filter=" + filter);
         System.out.println("Indent=" + indentNumber);
         return new UserInput(
                 value,
@@ -55,6 +54,34 @@ public final class InputInitService {
                 caretOffset - leftStep,
                 caretOffset + rightStep
         );
+    }
+
+    private boolean hasFilter(String[] inputElements) {
+        return inputElements.length > 1 && endsWithLetter(inputElements[inputElements.length - 1]);
+    }
+
+    private String[] stripLastElement(String[] elements) {
+        if (elements == null || elements.length == 0) {
+            return elements;
+        }
+        return Arrays.copyOf(elements, elements.length - 1);
+    }
+
+    private int getLeftInputIdx() {
+        int leftIdx = lineOffset - 1;
+        while (leftIdx >= 0 && !isInputStart(leftIdx)) {
+            leftIdx--;
+        }
+        leftIdx++;
+        return leftIdx;
+    }
+
+    private int getRightInputIdx() {
+        int rightIdx = lineOffset;
+        while (rightIdx < line.length() && !isInputEnd(rightIdx)) {
+            rightIdx++;
+        }
+        return rightIdx;
     }
 
     private boolean endsWithLetter(String lastInput) {

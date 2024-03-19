@@ -83,13 +83,13 @@ public class ExploreClassAction extends AnAction {
     }
 }
 
+// TODO: 27.02.2024 Generate API tree(for any depth without recursion)
 // TODO: 04.03.2024 Add menu with configuration:
 // - shortcut for gen strategy (unique, args, args + vars)
 // - sorting by name & group, by name only, by class order, by args count & type, by return value...
 // - filtering (deprecated, Object, customize exclusion by pattern, exclude parent, separate parent, include static vars)
 // - tree generation depth
+// TODO: 01.03.2024 Generate API for one of repeatable names in file
 // TODO: 01.03.2024 Generate API for static class
 // TODO: 01.03.2024 Generate API for static field
-// TODO: 01.03.2024 Generate API for one of repeatable names in file
-// TODO: 27.02.2024 Generate API tree(for any depth without recursion)
 // TODO: 01.03.2024 Generate API in lambda
